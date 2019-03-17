@@ -11,5 +11,8 @@
     "url": "https://github.com/lima1756/ProjecteManagementTool"
   },
   "author": "Ivan Morett",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.16.4"
+  }
 }
