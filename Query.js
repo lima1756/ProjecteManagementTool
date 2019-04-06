@@ -7,17 +7,19 @@ const greaterThan = '>',
     lessOrEqualThan = '<=',
     iqualThan = '=',
     differentThan = '!=',
-    is = 'IS',
-    isNot= 'IS NOT',
+    isOperator = 'IS',
+    isNotOperator= 'IS NOT',
     nullValue = 'NULL',
-    and = 'AND',
-    or = 'OR',
-    not = 'not',
+    andOperator = 'AND',
+    orOperator = 'OR',
+    notoperator = 'not',
     selectType = 'SELECT',
     updateType = 'UPDATE',
     insertType = 'INSERT',
     deleteType = 'DELETE';
 
+// TODO: create documentation
+// TODO: change pops to fors, I must not change the query created because the user may need it again
 
 //module.exports = 
 class Query{
@@ -56,18 +58,18 @@ class Query{
             }
 
             isNull(columnName){
-                this.structure = this.comparator(columnName, nullValue, is);
+                this.structure = this.comparator(columnName, nullValue, isOperator);
                 return this;
             }
 
             isNotNull(columnName){
-                this.structure = this.comparator(columnName, nullValue, isNot);
+                this.structure = this.comparator(columnName, nullValue, isNotOperator);
                 return this;
             }
         
-            comparator(columnName, value, symbol){
+            comparator(column, value, symbol){
                 return {
-                    columnName: columnName,
+                    column: column,
                     value: value,
                     symbol: symbol
                 }
@@ -76,7 +78,7 @@ class Query{
             static and(...args){
                 let result;
                 Query.argsToArray(args, (arr)=>{
-                    result = Comparator.aggrupator(arr, and);
+                    result = Comparator.operator(arr, andOperator);
                 });
                 return result;               
             } 
@@ -84,7 +86,7 @@ class Query{
             static or(...args){
                 let result;
                 Query.argsToArray(args, (arr)=>{
-                    result = Comparator.aggrupator(arr, or);
+                    result = Comparator.operator(arr, orOperator);
                 });
                 return result;
             }
@@ -92,16 +94,53 @@ class Query{
             static not(...args){
                 let result;
                 Query.argsToArray(args, (arr)=>{
-                    result = Comparator.aggrupator(arr, not);
+                    result = Comparator.operator(arr, notoperator);
                 });
                 return result;
             }
 
-            static aggrupator(comparators, aggrupation){
+            static operator(comparators, operator){
                 return {
-                    aggrupation:aggrupation,
+                    isAggrupation: true,
+                    operator:operator,
                     comparators: comparators
                 }
+            }
+
+            static createConditional(operation){
+                let conditionalString = ''
+                if(operation.hasOwnProperty('isAggrupation')){
+                    if(operation.operator==notoperator){
+                        conditionalString += notoperator + ' ';
+                    }
+                    conditionalString += '( '
+                    while(operation.comparators.length>0){
+                        let comparator = operation.comparators.pop();
+                        
+                        conditionalString += Comparator.createConditional(comparator);
+                        if(operation.operator!=notoperator && operation.comparators.length!=0){
+                            conditionalString += operation.operator + ' ';
+                        }
+                    }
+                    conditionalString += ') '
+                }
+                else{
+                    if(typeof(operation.structure.column)!=typeof('')){
+                        throw new Error('This field should be a string representing a column of your table');
+                    }
+                    else{
+                        conditionalString += operation.structure.column + ' ';
+                    }
+                    conditionalString += operation.structure.symbol + ' ';
+                    if(typeof(operation.structure.value)==typeof({})){
+                        conditionalString += '( ' + Query.createSelect(operation.structure.value) + ') ';
+                    }
+                    else{
+                        conditionalString += operation.structure.value + ' ';
+                    }
+                }
+
+                return conditionalString;
             }
         
         }
@@ -109,7 +148,7 @@ class Query{
     
     constructor(table){
         this.structure = {
-            tableName:table
+            table:table
         };
         return this;
     }
@@ -125,31 +164,28 @@ class Query{
     }
 
     join(table, onConditional){
-        if(!this.structure.join)
-            this.structure.join = []   
+        this.structure.join = this.structure.join || []   
         this.structure.join.push({
-            tableName: table,
-            on: onConditional
+            table: table,
+            onConditional: onConditional
         });
         return this;
     }
 
     leftJoin(table, onConditional){
-        if(!this.structure.join)
-            this.structure.leftJoin = []   
+        this.structure.leftJoin = this.structure.leftJoin || []   
         this.structure.leftJoin.push({
-            tableName: table,
-            on: onConditional
+            table: table,
+            onConditional: onConditional
         });
         return this;
     }
 
     rightJoin(table, onConditional){
-        if(!this.structure.join)
-            this.structure.rightJoin = []   
+        this.structure.rightJoin = this.structure.rightJoin || []   
         this.structure.rightJoin.push({
-            tableName: table,
-            on: onConditional
+            table: table,
+            onConditional: onConditional
         });
         return this;
     }
@@ -171,10 +207,12 @@ class Query{
         return this;
     }
 
-    orderBy(...args){
+    orderBy(desc, ...args){
+        this.structure.orderBy = {};
         Query.argsToArray(args, (arr)=>{
-            this.structure.orderBy = arr;
+            this.structure.orderBy.columns = arr;
         });
+        this.structure.orderBy.orderDesc = desc;
         return this;
     }
 
@@ -191,9 +229,19 @@ class Query{
         return this;
     }
 
-    insert(){
+    insert(...args){
         this.checkQueryTypeError(insertType);
-        // TODO: Finish this
+        Query.argsToArray(args, (arr)=>{
+            this.structure.insertColumns = arr;
+        }, false);
+        return this;
+    }
+
+    insertValues(...args){
+        this.structure.insertValues = this.structure.insertValues || [];
+        Query.argsToArray(args, (arr)=>{
+            this.structure.insertValues.push(arr);
+        })
         return this;
     }
 
@@ -204,8 +252,22 @@ class Query{
 
 
     run(){
-        // TODO: Create state machine to create query based on structure
-        console.log(util.inspect(this, false, null, true));
+        this.queryString = this.structure.type + ' ';
+        switch(this.structure.type){
+            case selectType:
+                this.queryString = Query.createSelect(this);
+                break;
+            case updateType:
+                break;
+            case deleteType:
+                break;
+            case insertType:
+                break;
+            default:
+                throw new Error('There is no CRUD operation selected, please add an operation in your method calls');
+        }
+        console.log(this.queryString);
+        // console.log(util.inspect(this, false, null, true));
     }
 
 
@@ -220,17 +282,113 @@ class Query{
         return new Error(`This method needs an array of elements or multiple elements as arguments`);
     }   
 
-    static argsToArray(args, callback){
-        if(args.length==1){
+    static argsToArray(args, callback, throwErrorIfZero=true){
+        if(args.length==1 && Array.isArray(args[0])){
             callback(args[0])
         }
-        else if(args.length>1){
+        else if(args.length>1 || (args.length==1 && !Array.isArray(args[0]))){
             callback(args)
+        }
+        else if(args.length==0 && throwErrorIfZero){
+            throw Query.argsError;
+        }
+        else if(args.length==0 && !throwErrorIfZero){
+            callback([])
         }
         else{
             throw Query.argsError;
         }
     }
+
+    static createSelect(queryObject){
+        let queryString = 'SELECT '
+        while(queryObject.structure.select.columns.length>0){
+            queryString += queryObject.structure.select.columns.pop()
+            if(queryObject.structure.select.columns.length != 0)
+                queryString += ', '
+            else
+                queryString += ' '
+        }
+        queryString += 'FROM ';
+        if(typeof(queryObject.structure.table)==typeof({})){
+            queryString += '( ';
+            queryString = Query.createSelect(queryObject.structure.table);
+            queryString += ') ';
+        }
+        else{
+            queryString += queryObject.structure.table + ' '
+        }
+        if(queryObject.structure.hasOwnProperty('join')){
+            while(queryObject.structure.join.length>0){
+                const join = queryObject.structure.join.pop();
+                queryString += 'JOIN '+ Query.createJoin(join)
+            }
+        }
+        if(queryObject.structure.hasOwnProperty('leftJoin')){
+            while(queryObject.structure.leftJoin.length>0){
+                const join = queryObject.structure.leftJoin.pop();
+                queryString += 'LEFT JOIN '+ Query.createJoin(join)
+            }
+        }
+        if(queryObject.structure.hasOwnProperty('rightJoin')){
+            while(queryObject.structure.rightJoin.length>0){
+                const join = queryObject.structure.rightJoin.pop();
+                queryString += 'RIGHT JOIN '+ Query.createJoin(join)
+            }
+        }
+        if(queryObject.structure.hasOwnProperty('where')){
+            queryString += 'WHERE '+ Query.Comparator.createConditional(queryObject.structure.where);
+        }
+
+        if(queryObject.structure.hasOwnProperty('groupBy')){
+            queryString += 'GROUP BY ';
+            while(queryObject.structure.groupBy.length>0){
+                const groupByColumn = queryObject.structure.groupBy.pop();
+                queryString += groupByColumn;
+                if(queryObject.structure.groupBy.length!=0){
+                    queryString += ', '
+                }
+                else{
+                    queryString += ' '
+                }
+            }
+        }
+
+        if(queryObject.structure.hasOwnProperty('having')){
+            queryString += 'HAVING '+ Query.Comparator.createConditional(queryObject.structure.having);
+        }
+
+        if(queryObject.structure.hasOwnProperty('orderBy')){
+            queryString += 'GROUP BY ';
+            for(let i = 0; i < queryObject.structure.orderBy.columns.length; i++){
+                queryString += queryObject.structure.orderBy.columns[i];
+                if(i!=queryObject.structure.orderBy.columns.length-1)
+                    queryString += ', ';
+                else{
+                    queryString += ' ';
+                }
+            }
+        }
+
+        return queryString;
+    }
+
+    static createJoin(joinObject){
+        let joinString = '';
+        if(typeof(joinObject.table)==typeof({})){
+            joinString += '( ';
+            joinString += Query.createSelect(joinObject.table);
+            joinString += ') ';
+        }
+        else{
+            joinString += (joinObject.table + ' ');
+        }
+        joinString += 'ON ' + Query.Comparator.createConditional(joinObject.onConditional);
+        
+        return joinString;
+    }
+
+
 }
 
 const andCom = Query.Comparator.and([new Query.Comparator().greaterThanOrEqualTo('a', 1), new Query.Comparator().equalTo('b', 20)]);
@@ -239,8 +397,10 @@ const orCom = Query.Comparator.or([andCom, new Query.Comparator().isNotNull('c')
 const havingCom = new Query.Comparator().equalTo('count(d)',20);
 
 (new Query('table')).select('a','b','c','count(d)')
-    .join('table2', (new Query.Comparator).equalTo('table.b','table2.f'))
+    .join('table2', new Query.Comparator().equalTo('table.b','table2.f'))
+    .leftJoin(new Query('table3').select('f','g','h'), new Query.Comparator().equalTo('table.b','table3.g'))
     .where(orCom)
-    .groupBy()
+    .groupBy('a', 'b', 'c')
     .having(havingCom)
+    .orderBy(false, 'a', 'b')
     .run();

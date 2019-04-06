@@ -26,12 +26,8 @@ function startServer(DBInstance){
 
 
   if(!isProduction){
-      // TODO: Connect to db to localhost
       // TODO: app.use test packages and error handlers 
       
-      
-  } else {
-      // Connect to DB to server
       
   }
 
