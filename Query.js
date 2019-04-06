@@ -218,8 +218,8 @@ class Query{
 
     /**
      * 
-     * @param  {...any} args The arguments of the function should be or an array of key-value pairs (key is the column and the pair the new value)
-     * or different arguments of key-value pairs.
+     * @param  {...any} args The arguments of the function should be or an array of arrays 
+     * or different arguments of arrays. This second arrays should be [column, <new_value>]
      */
     update(...args){
         this.checkQueryTypeError(updateType);
@@ -258,6 +258,7 @@ class Query{
                 this.queryString = Query.createSelect(this);
                 break;
             case updateType:
+                this.queryString = Query.createUpdate(this);
                 break;
             case deleteType:
                 break;
@@ -336,9 +337,8 @@ class Query{
                 queryString += 'RIGHT JOIN '+ Query.createJoin(join)
             }
         }
-        if(queryObject.structure.hasOwnProperty('where')){
-            queryString += 'WHERE '+ Query.Comparator.createConditional(queryObject.structure.where);
-        }
+
+        queryString += Query.createWhere(queryObject);
 
         if(queryObject.structure.hasOwnProperty('groupBy')){
             queryString += 'GROUP BY ';
@@ -388,6 +388,37 @@ class Query{
         return joinString;
     }
 
+    static createWhere(queryObject){
+        if(queryObject.structure.hasOwnProperty('where')){
+            return 'WHERE '+ Query.Comparator.createConditional(queryObject.structure.where);
+        }
+        else{
+            return '';
+        }
+    }
+
+    static createUpdate(queryObject){
+        let queryString = 'UPDATE ' + queryObject.structure.table + ' SET ';
+        for(let i = 0; i < queryObject.structure.updateSet.length; i++){
+            queryString += queryObject.structure.updateSet[i][0]+' = '+queryObject.structure.updateSet[i][1]
+            if(i!=queryObject.structure.updateSet.length-1){
+                queryString+= ', '
+            }
+            else{
+                queryString+= ' '
+            }
+        }
+        queryString += Query.createWhere(queryObject);
+        return queryString;
+    }
+
+    static createInsert(queryObject){
+
+    }
+
+    static createDelete(){
+
+    }
 
 }
 
@@ -404,3 +435,5 @@ const havingCom = new Query.Comparator().equalTo('count(d)',20);
     .having(havingCom)
     .orderBy(false, 'a', 'b')
     .run();
+
+new Query('table').update(['a',1],['b',2],['c','f']).where(new Query.Comparator().equalTo('a',2)).run();
