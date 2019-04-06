@@ -1,22 +1,22 @@
 const util = require('util')
 const DBController = require('./DBController');
 
-const greaterThan = '>',
-    greaterOrEqualThan = '>=',
-    lessThan = '<',
-    lessOrEqualThan = '<=',
-    iqualThan = '=',
-    differentThan = '!=',
-    isOperator = 'IS',
-    isNotOperator= 'IS NOT',
-    nullValue = 'NULL',
-    andOperator = 'AND',
-    orOperator = 'OR',
-    notoperator = 'not',
-    selectType = 'SELECT',
-    updateType = 'UPDATE',
-    insertType = 'INSERT',
-    deleteType = 'DELETE';
+const GREATER_THAN = '>',
+    GREATER_THAN_OR_EQUAL_TO = '>=',
+    LESS_THAN = '<',
+    LESS_THAN_OR_EQUAL_TO = '<=',
+    EQUAL_TO = '=',
+    DIFFERENT_TO = '!=',
+    IS_OPERATOR = 'IS',
+    IS_NOT_OPERATOR= 'IS NOT',
+    NULL_VALUE = 'NULL',
+    AND_OPERATOR = 'AND',
+    OR_OPERATOR = 'OR',
+    NOT_OPERATOR = 'not',
+    SELECT_TYPE = 'SELECT',
+    UPDATE_TYPE = 'UPDATE',
+    INSERT_TYPE = 'INSERT',
+    DELETE_TYPE = 'DELETE';
 
 // TODO: create documentation
 // TODO: change pops to fors, I must not change the query created because the user may need it again
@@ -28,42 +28,42 @@ class Query{
         return class Comparator{
 
             greaterThan(columnName, value){
-                this.structure = this.comparator(columnName, value, greaterThan);
+                this.structure = this.comparator(columnName, value, GREATER_THAN);
                 return this;
             }
 
             greaterThanOrEqualTo(columnName, value){
-                this.structure = this.comparator(columnName, value, greaterOrEqualThan);
+                this.structure = this.comparator(columnName, value, GREATER_THAN_OR_EQUAL_TO);
                 return this;
             }
         
             lessThan(columnName, value){
-                this.structure = this.comparator(columnName, value, lessThan);
+                this.structure = this.comparator(columnName, value, LESS_THAN);
                 return this;
             }
             
             lessThanOrEqualTo(columnName, value){
-                this.structure = this.comparator(columnName, value, lessOrEqualThan);
+                this.structure = this.comparator(columnName, value, LESS_THAN_OR_EQUAL_TO);
                 return this;
             }
         
             equalTo(columnName, value){
-                this.structure = this.comparator(columnName, value, iqualThan);
+                this.structure = this.comparator(columnName, value, EQUAL_TO);
                 return this;
             }
 
             differentThan(columnName, value){
-                this.structure = this.comparator(columnName, value, differentThan);
+                this.structure = this.comparator(columnName, value, DIFFERENT_TO);
                 return this;
             }
 
             isNull(columnName){
-                this.structure = this.comparator(columnName, nullValue, isOperator);
+                this.structure = this.comparator(columnName, NULL_VALUE, IS_OPERATOR);
                 return this;
             }
 
             isNotNull(columnName){
-                this.structure = this.comparator(columnName, nullValue, isNotOperator);
+                this.structure = this.comparator(columnName, NULL_VALUE, IS_NOT_OPERATOR);
                 return this;
             }
         
@@ -78,7 +78,7 @@ class Query{
             static and(...args){
                 let result;
                 Query.argsToArray(args, (arr)=>{
-                    result = Comparator.operator(arr, andOperator);
+                    result = Comparator.operator(arr, AND_OPERATOR);
                 });
                 return result;               
             } 
@@ -86,7 +86,7 @@ class Query{
             static or(...args){
                 let result;
                 Query.argsToArray(args, (arr)=>{
-                    result = Comparator.operator(arr, orOperator);
+                    result = Comparator.operator(arr, OR_OPERATOR);
                 });
                 return result;
             }
@@ -94,7 +94,7 @@ class Query{
             static not(...args){
                 let result;
                 Query.argsToArray(args, (arr)=>{
-                    result = Comparator.operator(arr, notoperator);
+                    result = Comparator.operator(arr, NOT_OPERATOR);
                 });
                 return result;
             }
@@ -110,15 +110,15 @@ class Query{
             static createConditional(operation){
                 let conditionalString = ''
                 if(operation.hasOwnProperty('isAggrupation')){
-                    if(operation.operator==notoperator){
-                        conditionalString += notoperator + ' ';
+                    if(operation.operator==NOT_OPERATOR){
+                        conditionalString += NOT_OPERATOR + ' ';
                     }
                     conditionalString += '( '
                     while(operation.comparators.length>0){
                         let comparator = operation.comparators.pop();
                         
                         conditionalString += Comparator.createConditional(comparator);
-                        if(operation.operator!=notoperator && operation.comparators.length!=0){
+                        if(operation.operator!=NOT_OPERATOR && operation.comparators.length!=0){
                             conditionalString += operation.operator + ' ';
                         }
                     }
@@ -154,7 +154,7 @@ class Query{
     }
 
     select(...args){
-        this.checkQueryTypeError(selectType);
+        this.checkQueryTypeError(SELECT_TYPE);
         Query.argsToArray(args, (arr)=>{
             this.structure.select = {
                 columns: arr
@@ -222,7 +222,7 @@ class Query{
      * or different arguments of arrays. This second arrays should be [column, <new_value>]
      */
     update(...args){
-        this.checkQueryTypeError(updateType);
+        this.checkQueryTypeError(UPDATE_TYPE);
         Query.argsToArray(args, (arr)=>{
             this.structure.updateSet = arr;
         })
@@ -230,7 +230,7 @@ class Query{
     }
 
     insert(...args){
-        this.checkQueryTypeError(insertType);
+        this.checkQueryTypeError(INSERT_TYPE);
         Query.argsToArray(args, (arr)=>{
             this.structure.insertColumns = arr;
         }, false);
@@ -246,7 +246,7 @@ class Query{
     }
 
     delete(){
-        this.checkQueryTypeError(deleteType);
+        this.checkQueryTypeError(DELETE_TYPE);
         return this;
     }
 
@@ -254,16 +254,16 @@ class Query{
     run(){
         this.queryString = this.structure.type + ' ';
         switch(this.structure.type){
-            case selectType:
+            case SELECT_TYPE:
                 this.queryString = Query.createSelect(this);
                 break;
-            case updateType:
+            case UPDATE_TYPE:
                 this.queryString = Query.createUpdate(this);
                 break;
-            case deleteType:
+            case DELETE_TYPE:
                 this.queryString = Query.createDelete(this);
                 break;
-            case insertType:
+            case INSERT_TYPE:
                 break;
             default:
                 throw new Error('There is no CRUD operation selected, please add an operation in your method calls');
