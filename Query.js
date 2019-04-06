@@ -261,6 +261,7 @@ class Query{
                 this.queryString = Query.createUpdate(this);
                 break;
             case deleteType:
+                this.queryString = Query.createDelete(this);
                 break;
             case insertType:
                 break;
@@ -416,8 +417,10 @@ class Query{
 
     }
 
-    static createDelete(){
-
+    static createDelete(queryObject){
+        let queryString = 'DELETE FROM ' + queryObject.structure.table + ' ';
+        queryString += Query.createWhere(queryObject);
+        return queryString;
     }
 
 }
@@ -437,3 +440,5 @@ const havingCom = new Query.Comparator().equalTo('count(d)',20);
     .run();
 
 new Query('table').update(['a',1],['b',2],['c','f']).where(new Query.Comparator().equalTo('a',2)).run();
+
+new Query('table').delete().where(new Query.Comparator().equalTo('a',2)).run();
