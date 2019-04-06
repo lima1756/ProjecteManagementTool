@@ -422,6 +422,9 @@ class Query{
         return queryString;
     }
 
+    // TODO: right now you can only insert one at a time so I decided to 
+    // only return the first query generated for that. Because of this, 
+    // I need to fix this so the user could insert multiple rows at once
     static createInsert(queryObject){
         let prototype = 'INSERT INTO ' + queryObject.structure.table;
         if(queryObject.structure.insertColumns.length>0){
@@ -457,7 +460,7 @@ class Query{
             queryString.push(prototype+values);
         }
         
-        return queryString;
+        return queryString[0];
     }
 
     static createDelete(queryObject){
