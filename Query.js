@@ -178,26 +178,33 @@ class Query{
         return this;
     }
 
-    update(updateData){
+    /**
+     * 
+     * @param  {...any} args The arguments of the function should be or an array of key-value pairs (key is the column and the pair the new value)
+     * or different arguments of key-value pairs.
+     */
+    update(...args){
         this.checkQueryTypeError(updateType);
-        
+        Query.argsToArray(args, (arr)=>{
+            this.structure.updateSet = arr;
+        })
         return this;
     }
 
     insert(){
         this.checkQueryTypeError(insertType);
-
+        // TODO: Finish this
         return this;
     }
 
     delete(){
         this.checkQueryTypeError(deleteType);
-
         return this;
     }
 
 
     run(){
+        // TODO: Create state machine to create query based on structure
         console.log(util.inspect(this, false, null, true));
     }
 

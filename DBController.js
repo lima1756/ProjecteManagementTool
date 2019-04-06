@@ -39,11 +39,6 @@ module.exports = class DBController{
       };
       return DBController.instance.connection.execute(sql, binds, options);
     }
-
-    // TODO: Generar una clase Query que me permita ir construyendo queries a partir de funciones (las funciones regresan el mismo objeto)
-    // Al finalizar solo se debe invocar al metodo run el cual generaria la promesa final
-    // Considero que la mejor forma de construir esto seria que fuera creando un objeto y 
-    // al final en el run reviso los atributos del objeto y genero el string del query
 }
 
 // async function run() {
@@ -135,7 +130,3 @@ module.exports = class DBController{
 // }
 
 // run();
-
-// TODO: Awaits lo que hacen es esperar la respuesta como tal, lo que se requiere actualmente en el sistema es eliminar esos awaits
-// y generar las funciones que se requieren para los queries
-// De aqui se van a exportar las funciones necesarias para la manipulación de la bdd
