@@ -240,7 +240,14 @@ class Query{
     insertValues(...args){
         this.structure.insertValues = this.structure.insertValues || [];
         Query.argsToArray(args, (arr)=>{
-            this.structure.insertValues.push(arr);
+            if(Array.isArray(arr[0])){
+                for(let i = 0; i < arr.length; i++){
+                    this.structure.insertValues.push(arr[i]);
+                }
+            }
+            else{
+                this.structure.insertValues.push(arr);
+            }
         })
         return this;
     }
@@ -251,8 +258,8 @@ class Query{
     }
 
 
-    run(){
-        this.queryString = this.structure.type + ' ';
+    run(printQuery=false){
+        this.queryString = '';
         switch(this.structure.type){
             case SELECT_TYPE:
                 this.queryString = Query.createSelect(this);
@@ -264,11 +271,13 @@ class Query{
                 this.queryString = Query.createDelete(this);
                 break;
             case INSERT_TYPE:
+                this.queryString = Query.createInsert(this);
                 break;
             default:
                 throw new Error('There is no CRUD operation selected, please add an operation in your method calls');
         }
-        console.log(this.queryString);
+        if(printQuery)
+            console.log(this.queryString);
         // console.log(util.inspect(this, false, null, true));
     }
 
@@ -414,7 +423,41 @@ class Query{
     }
 
     static createInsert(queryObject){
-
+        let prototype = 'INSERT INTO ' + queryObject.structure.table;
+        if(queryObject.structure.insertColumns.length>0){
+            prototype += '( '
+            for(let i = 0; i < queryObject.structure.insertColumns.length; i++){
+                prototype += queryObject.structure.insertColumns[i]
+                if(i!=queryObject.structure.insertColumns.length-1){
+                    prototype+= ', '
+                }
+                else{
+                    prototype+= ' '
+                }
+            }
+            prototype += ') '
+        }
+        else{
+            prototype += ' '
+        }
+        prototype += 'VALUES'
+        let queryString = [];
+        for(let i = 0; i < queryObject.structure.insertValues.length; i++){
+            let values = '( ';
+            for(let j = 0; j < queryObject.structure.insertValues[i].length; j++){
+                values += queryObject.structure.insertValues[i][j];
+                if(j!=queryObject.structure.insertValues[i].length-1){
+                    values+= ', '
+                }
+                else{
+                    values+= ' '
+                }
+            }
+            values += ') ';
+            queryString.push(prototype+values);
+        }
+        
+        return queryString;
     }
 
     static createDelete(queryObject){
@@ -437,8 +480,10 @@ const havingCom = new Query.Comparator().equalTo('count(d)',20);
     .groupBy('a', 'b', 'c')
     .having(havingCom)
     .orderBy(false, 'a', 'b')
-    .run();
+    .run(true);
 
-new Query('table').update(['a',1],['b',2],['c','f']).where(new Query.Comparator().equalTo('a',2)).run();
+new Query('table').update(['a',1],['b',2],['c','f']).where(new Query.Comparator().equalTo('a',2)).run(true);
 
-new Query('table').delete().where(new Query.Comparator().equalTo('a',2)).run();
+new Query('table').delete().where(new Query.Comparator().equalTo('a',2)).run(true);
+
+new Query('table').insert().insertValues(['1','1','1'],['2','2','2']).run(true);
