@@ -29,15 +29,15 @@ CREATE TABLE team_permissions(
     list_delete NUMBER(1) DEFAULT 0 NOT NULL,
     tasks_in_lists_move NUMBER(1) DEFAULT 0 NOT NULL,
     CONSTRAINT team_permissions_pk PRIMARY KEY (person_id, team_id),
-    CONSTRAINT team_permissions_fk_person FOREIGN KEY (person_id) REFERENCES person(id),
-    CONSTRAINT team_permissions_fk_team FOREIGN KEY (team_id) REFERENCES team(id)
+    CONSTRAINT team_permissions_fk_person FOREIGN KEY (person_id) REFERENCES person(id) ON DELETE CASCADE,
+    CONSTRAINT team_permissions_fk_team FOREIGN KEY (team_id) REFERENCES team(id) ON DELETE CASCADE
 );
 
 CREATE TABLE emails(
     email VARCHAR(80),
     person_id INT,
     CONSTRAINT emails_pk PRIMARY KEY (email, person_id),
-    CONSTRAINT emails_fk FOREIGN KEY (person_id) REFERENCES person(id)
+    CONSTRAINT emails_fk FOREIGN KEY (person_id) REFERENCES person(id) ON DELETE CASCADE
 );
 
 CREATE TABLE project(
@@ -62,8 +62,8 @@ CREATE TABLE project_permissions(
     list_delete NUMBER(1) DEFAULT 0 NOT NULL,
     tasks_in_lists_move NUMBER(1) DEFAULT 0 NOT NULL,
     CONSTRAINT project_permissions_pk PRIMARY KEY (person_id, project_id),
-    CONSTRAINT project_permissions_fk_person FOREIGN KEY (person_id) REFERENCES person(id),
-    CONSTRAINT project_permissions_fk_project FOREIGN KEY (project_id) REFERENCES project(id)
+    CONSTRAINT project_permissions_fk_person FOREIGN KEY (person_id) REFERENCES person(id) ON DELETE CASCADE,
+    CONSTRAINT project_permissions_fk_project FOREIGN KEY (project_id) REFERENCES project(id) ON DELETE CASCADE
 );
 
 CREATE TABLE tag(
@@ -71,7 +71,7 @@ CREATE TABLE tag(
     tag_name VARCHAR(20),
     color VARCHAR(6),
     project_id INT,
-    CONSTRAINT tag_fk_project FOREIGN KEY (project_id) REFERENCES project(id)
+    CONSTRAINT tag_fk_project FOREIGN KEY (project_id) REFERENCES project(id) ON DELETE CASCADE
 );
 
 CREATE TABLE milestone(
@@ -87,8 +87,8 @@ CREATE TABLE milestone_tag(
     milestone_id INT,
     tag_id INT,
     CONSTRAINT milestone_tag_pk PRIMARY KEY (milestone_id, tag_id),
-    CONSTRAINT milestone_tag_fk_mileston FOREIGN KEY (milestone_id) REFERENCES milestone(id),
-    CONSTRAINT milestone_tag_fk_tag FOREIGN KEY (tag_id) REFERENCES tag(id)
+    CONSTRAINT milestone_tag_fk_mileston FOREIGN KEY (milestone_id) REFERENCES milestone(id) ON DELETE CASCADE,
+    CONSTRAINT milestone_tag_fk_tag FOREIGN KEY (tag_id) REFERENCES tag(id) ON DELETE CASCADE
 );
 
 CREATE TABLE task(
@@ -98,23 +98,23 @@ CREATE TABLE task(
     deadline DATE,
     task_state VARCHAR(15) DEFAULT 'open' CHECK( task_state IN ('open','closed', 'closed_finished') ) NOT NULL,
     milestone_id INT,
-    CONSTRAINT task_fk_milestone FOREIGN KEY (milestone_id) REFERENCES milestone(id)
+    CONSTRAINT task_fk_milestone FOREIGN KEY (milestone_id) REFERENCES milestone(id) ON DELETE SET NULL
 );
 
 CREATE TABLE task_tag(
     task_id INT,
     tag_id INT,
     CONSTRAINT task_tag_pk PRIMARY KEY (task_id, tag_id),
-    CONSTRAINT task_tag_fk_mileston FOREIGN KEY (task_id) REFERENCES task(id),
-    CONSTRAINT task_tag_fk_tag FOREIGN KEY (tag_id) REFERENCES tag(id)
+    CONSTRAINT task_tag_fk_task FOREIGN KEY (task_id) REFERENCES task(id) ON DELETE CASCADE,
+    CONSTRAINT task_tag_fk_tag FOREIGN KEY (tag_id) REFERENCES tag(id) ON DELETE CASCADE
 );
 
 CREATE TABLE person_works_task(
     task_id INT NOT NULL,
     person_id INT NOT NULL,
     CONSTRAINT person_works_task_pk PRIMARY KEY (task_id, person_id),
-    CONSTRAINT person_works_task_fk_person FOREIGN KEY (person_id) REFERENCES person(id),
-    CONSTRAINT person_works_task_fk_task FOREIGN KEY (task_id) REFERENCES task(id)
+    CONSTRAINT person_works_task_fk_person FOREIGN KEY (person_id) REFERENCES person(id) ON DELETE CASCADE,
+    CONSTRAINT person_works_task_fk_task FOREIGN KEY (task_id) REFERENCES task(id) ON DELETE CASCADE
 );
 
 CREATE TABLE task_comment(
@@ -122,14 +122,24 @@ CREATE TABLE task_comment(
     content VARCHAR(4000) NOT NULL,
     task_id INT NOT NULL,
     person_id INT NOT NULL,
-    CONSTRAINT comment_fk_task FOREIGN KEY (task_id) REFERENCES task(id),
-    CONSTRAINT comment_fk_person FOREIGN KEY (person_id) REFERENCES person(id)
+    CONSTRAINT comment_fk_task FOREIGN KEY (task_id) REFERENCES task(id) ON DELETE CASCADE,
+    CONSTRAINT comment_fk_person FOREIGN KEY (person_id) REFERENCES person(id) ON DELETE SET NULL
 );
 
 CREATE TABLE list(
     id INT GENERATED ALWAYS as IDENTITY(START with 1 INCREMENT by 1) PRIMARY KEY,
     next_list_id INT,
     tag_id INT,
-    CONSTRAINT list_fk_list FOREIGN KEY (next_list_id) REFERENCES list(id),
-    CONSTRAINT list_fk_tag FOREIGN KEY (tag_id) REFERENCES tag(id)
+    CONSTRAINT list_fk_list FOREIGN KEY (next_list_id) REFERENCES list(id) ON DELETE SET NULL,
+    CONSTRAINT list_fk_tag FOREIGN KEY (tag_id) REFERENCES tag(id) ON DELETE CASCADE
 );
+
+CREATE OR REPLACE TRIGGER list_order_trigger
+BEFORE DELETE
+ON list
+FOR EACH ROW
+BEGIN
+    UPDATE list
+    SET next_list_id = :old.next_list_id
+    WHERE list.id = (SELECT id FROM list WHERE next_list_id=:old.id);
+END;
