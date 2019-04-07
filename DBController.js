@@ -12,32 +12,32 @@ module.exports = class DBController{
 
     constructor(callback){
       if(!DBController.instance){
-        oracledb.getConnection(  {
-            user          : dbConfig.user,
-            password      : dbConfig.password,
-            connectString : dbConfig.connectString
-        }).then(answer=>{
-          this.connection = answer;
-          DBController.instance = this;
-          callback(this);
-        }).catch(error=>{
-          throw new Error(error);
-        });
+        return DBController.init()
+          .then(answer=>{
+            this.connection = answer;
+            DBController.instance = this;
+            if(callback!=null)
+              callback(this);
+          }).catch(error=>{
+            throw new Error(error);
+          });
       }
-      return DBController.instance;
     }
 
-    raw(sql){
+    static async init(){
+      return oracledb.getConnection(  {
+          user          : dbConfig.user,
+          password      : dbConfig.password,
+          connectString : dbConfig.connectString
+      })
+    }
 
-      const binds = {};
-
-    
+    executeSQL(sql){
       const options = {
-        outFormat: oracledb.OBJECT   // query result format
-        // extendedMetaData: true,   // get extra metadata
-        // fetchArraySize: 100       // internal buffer allocation size for tuning
+        outFormat: oracledb.OBJECT,
+        autoCommit: true
       };
-      return DBController.instance.connection.execute(sql, binds, options);
+      return DBController.instance.connection.execute(sql, {}, options);
     }
 }
 

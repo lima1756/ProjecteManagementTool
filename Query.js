@@ -16,7 +16,9 @@ const GREATER_THAN = '>',
     SELECT_TYPE = 'SELECT',
     UPDATE_TYPE = 'UPDATE',
     INSERT_TYPE = 'INSERT',
-    DELETE_TYPE = 'DELETE';
+    DELETE_TYPE = 'DELETE',
+    RAW_TYPE = 'RAW';
+
 
 // TODO: create documentation
 // TODO: change pops to fors, I must not change the query created because the user may need it again
@@ -258,8 +260,7 @@ class Query{
     }
 
 
-    run(printQuery=false){
-        this.queryString = '';
+    async run(printQuery=false){
         switch(this.structure.type){
             case SELECT_TYPE:
                 this.queryString = Query.createSelect(this);
@@ -273,14 +274,31 @@ class Query{
             case INSERT_TYPE:
                 this.queryString = Query.createInsert(this);
                 break;
+            case RAW_TYPE:
+                console.warn("Please be carefull when running raw queries");
+                break;
             default:
                 throw new Error('There is no CRUD operation selected, please add an operation in your method calls');
+            
         }
+        
         if(printQuery)
             console.log(this.queryString);
+        if(!DBController.instance){
+            await new DBController(null);
+        }
+        console.log(this);
+        return DBController.instance.executeSQL(this.queryString);
         // console.log(util.inspect(this, false, null, true));
     }
 
+    raw(sql){
+        this.queryString = sql;
+        this.structure = {
+            type: RAW_TYPE
+        }
+        return this;
+    }
 
     checkQueryTypeError(newType){
         if(!this.structure.type)
@@ -369,7 +387,7 @@ class Query{
         }
 
         if(queryObject.structure.hasOwnProperty('orderBy')){
-            queryString += 'GROUP BY ';
+            queryString += 'ORDER BY ';
             for(let i = 0; i < queryObject.structure.orderBy.columns.length; i++){
                 queryString += queryObject.structure.orderBy.columns[i];
                 if(i!=queryObject.structure.orderBy.columns.length-1)
@@ -377,6 +395,12 @@ class Query{
                 else{
                     queryString += ' ';
                 }
+            }
+            if(queryObject.structure.orderBy.orderDesc){
+                queryString += 'DESC ';
+            }
+            else if(!queryObject.structure.orderBy.orderDesc){
+                queryString += 'ASC ';
             }
         }
 
@@ -470,23 +494,3 @@ class Query{
     }
 
 }
-
-const andCom = Query.Comparator.and([new Query.Comparator().greaterThanOrEqualTo('a', 1), new Query.Comparator().equalTo('b', 20)]);
-const orCom = Query.Comparator.or([andCom, new Query.Comparator().isNotNull('c')]);
-
-const havingCom = new Query.Comparator().equalTo('count(d)',20);
-
-(new Query('table')).select('a','b','c','count(d)')
-    .join('table2', new Query.Comparator().equalTo('table.b','table2.f'))
-    .leftJoin(new Query('table3').select('f','g','h'), new Query.Comparator().equalTo('table.b','table3.g'))
-    .where(orCom)
-    .groupBy('a', 'b', 'c')
-    .having(havingCom)
-    .orderBy(false, 'a', 'b')
-    .run(true);
-
-new Query('table').update(['a',1],['b',2],['c','f']).where(new Query.Comparator().equalTo('a',2)).run(true);
-
-new Query('table').delete().where(new Query.Comparator().equalTo('a',2)).run(true);
-
-new Query('table').insert().insertValues(['1','1','1'],['2','2','2']).run(true);

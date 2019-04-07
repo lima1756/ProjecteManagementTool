@@ -4,18 +4,7 @@ const DBController =  require('./DBController');
 new DBController(startServer);
 
 function startServer(DBInstance){
-  console.log("SUCCESFULL CONNECTION WITH DB\n -------------------")
-  
-  console.log("STARTING SERVER")
   Object.freeze(DBInstance);
-
-  
-  DBInstance.raw('SELECT * FROM mytab').then(result=>{
-    console.log(result.rows);
-  });
-
-  
-
 
   const isProduction = process.env.NODE_ENV === 'production';
 
