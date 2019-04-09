@@ -1,5 +1,4 @@
-const util = require('util')
-const DBController = require('./DBController');
+const DBController = require('./controllers/DBController');
 
 const GREATER_THAN = '>',
     GREATER_THAN_OR_EQUAL_TO = '>=',

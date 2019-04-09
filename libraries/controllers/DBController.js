@@ -1,7 +1,7 @@
 process.env.ORA_SDTZ = 'UTC';
 
 const oracledb = require('oracledb');
-const dbConfig = require('./dbconfig.js');
+const dbConfig = require('../../config/dbconfig.js');
 
 
 /**
