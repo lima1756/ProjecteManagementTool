@@ -32,12 +32,11 @@ module.exports = class DBController{
       })
     }
 
-    executeSQL(sql){
-      const options = {
-        outFormat: oracledb.OBJECT,
-        autoCommit: true
-      };
-      return DBController.instance.connection.execute(sql, {}, options);
+    executeSQL(sql, binds, options){
+
+      options.outFormat= oracledb.OBJECT;
+      options.autoCommit= true;
+      return DBController.instance.connection.execute(sql, binds, options);
     }
 }
 

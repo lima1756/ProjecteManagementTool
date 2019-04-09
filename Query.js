@@ -23,8 +23,7 @@ const GREATER_THAN = '>',
 // TODO: create documentation
 // TODO: change pops to fors, I must not change the query created because the user may need it again
 
-//module.exports = 
-class Query{
+module.exports = class Query{
 
     static get Comparator(){
         return class Comparator{
@@ -231,11 +230,12 @@ class Query{
         return this;
     }
 
-    insert(...args){
+    insert(returnId=true, ...args){
         this.checkQueryTypeError(INSERT_TYPE);
         Query.argsToArray(args, (arr)=>{
             this.structure.insertColumns = arr;
         }, false);
+        this.structure.returnId = returnId;
         return this;
     }
 
@@ -260,7 +260,7 @@ class Query{
     }
 
 
-    async run(printQuery=false){
+    async run(printQuery=false, binds = {}, options = {}){
         switch(this.structure.type){
             case SELECT_TYPE:
                 this.queryString = Query.createSelect(this);
@@ -287,8 +287,7 @@ class Query{
         if(!DBController.instance){
             await new DBController(null);
         }
-        console.log(this);
-        return DBController.instance.executeSQL(this.queryString);
+        return DBController.instance.executeSQL(this.queryString, binds, options);
         // console.log(util.inspect(this, false, null, true));
     }
 
@@ -472,7 +471,11 @@ class Query{
         for(let i = 0; i < queryObject.structure.insertValues.length; i++){
             let values = '( ';
             for(let j = 0; j < queryObject.structure.insertValues[i].length; j++){
-                values += queryObject.structure.insertValues[i][j];
+                if(typeof(queryObject.structure.insertValues[i][j])==typeof("")){
+                    values += "'"+queryObject.structure.insertValues[i][j]+"'";
+                } else {
+                    values += queryObject.structure.insertValues[i][j];
+                }
                 if(j!=queryObject.structure.insertValues[i].length-1){
                     values+= ', '
                 }
@@ -481,9 +484,8 @@ class Query{
                 }
             }
             values += ') ';
-            queryString.push(prototype+values);
+            queryString.push(prototype+values+(queryObject.structure.returnId?"RETURN id INTO :id":""));
         }
-        
         return queryString[0];
     }
 

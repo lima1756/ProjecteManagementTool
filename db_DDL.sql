@@ -4,7 +4,15 @@ CREATE TABLE person(
     password VARCHAR(120),
     first_name VARCHAR(100),
     last_name VARCHAR(100),
-    profile_img VARCHAR(120)
+    profile_img VARCHAR(120),
+    verified NUMBER(1) DEFAULT 0 NOT NULL
+);
+
+CREATE TABLE person_session(
+    sessionKey VARCHAR(200) PRIMARY KEY,
+    expiration TIMESTAMP,
+    person_id INT,
+    CONSTRAINT session_fk_user FOREIGN KEY (person_id) REFERENCES person(id) ON DELETE CASCADE
 );
 
 CREATE TABLE team(
