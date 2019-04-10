@@ -8,17 +8,10 @@ CREATE TABLE person(
     verified NUMBER(1) DEFAULT 0 NOT NULL
 );
 
-CREATE TABLE person_session(
-    sessionKey VARCHAR(200) PRIMARY KEY,
-    expiration TIMESTAMP,
-    person_id INT,
-    CONSTRAINT session_fk_user FOREIGN KEY (person_id) REFERENCES person(id) ON DELETE CASCADE
-);
-
 CREATE TABLE team(
     id INT GENERATED ALWAYS as IDENTITY(START with 1 INCREMENT by 1) PRIMARY KEY,
     name VARCHAR(30) NOT NULL,
-    creation_date DATE NOT NULL
+    creation_date DATE DEFAULT CURRENT_TIMESTAMP NOT NULL 
 );
 
 CREATE TABLE team_permissions(
@@ -41,8 +34,9 @@ CREATE TABLE team_permissions(
     CONSTRAINT team_permissions_fk_team FOREIGN KEY (team_id) REFERENCES team(id) ON DELETE CASCADE
 );
 
-CREATE TABLE emails(
+CREATE TABLE email(
     email VARCHAR(80),
+    main NUMBER(1) DEFAULT 0 NOT NULL,
     person_id INT,
     CONSTRAINT emails_pk PRIMARY KEY (email, person_id),
     CONSTRAINT emails_fk FOREIGN KEY (person_id) REFERENCES person(id) ON DELETE CASCADE

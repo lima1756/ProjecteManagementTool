@@ -38,6 +38,19 @@ module.exports = class DBController{
       options.autoCommit= true;
       return DBController.instance.connection.execute(sql, binds, options);
     }
+
+    static oracleToSimpleJson(oracleFormatObject){
+      let object = {
+        size: oracleFormatObject.rows.length,
+        rows: oracleFormatObject.rows,
+        columnsSize: oracleFormatObject.metaData.length
+      }
+      object.columns = []
+      for(let i = 0; i<object.columnsSize; i++){
+          object.columns.push(oracleFormatObject.metaData[i]['name']);
+      }
+      return object;
+    }
 }
 
 // async function run() {

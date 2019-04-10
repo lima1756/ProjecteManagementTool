@@ -7,6 +7,7 @@ const GREATER_THAN = '>',
     EQUAL_TO = '=',
     DIFFERENT_TO = '!=',
     IS_OPERATOR = 'IS',
+    LIKE_OPERATOR = 'LIKE',
     IS_NOT_OPERATOR= 'IS NOT',
     NULL_VALUE = 'NULL',
     AND_OPERATOR = 'AND',
@@ -20,7 +21,6 @@ const GREATER_THAN = '>',
 
 
 // TODO: create documentation
-// TODO: change pops to fors, I must not change the query created because the user may need it again
 
 module.exports = class Query{
 
@@ -52,6 +52,11 @@ module.exports = class Query{
                 return this;
             }
 
+            like(columnName, value){
+                this.structure = this.comparator(columnName, value, LIKE_OPERATOR);
+                return this;
+            }
+
             differentThan(columnName, value){
                 this.structure = this.comparator(columnName, value, DIFFERENT_TO);
                 return this;
@@ -68,6 +73,7 @@ module.exports = class Query{
             }
         
             comparator(column, value, symbol){
+                value = Query.checkForBooleans(value);
                 return {
                     column: column,
                     value: value,
@@ -114,8 +120,8 @@ module.exports = class Query{
                         conditionalString += NOT_OPERATOR + ' ';
                     }
                     conditionalString += '( '
-                    while(operation.comparators.length>0){
-                        let comparator = operation.comparators.pop();
+                    for(let i = 0; i < operation.comparators.length; i++){
+                        let comparator = operation.comparators[i];
                         
                         conditionalString += Comparator.createConditional(comparator);
                         if(operation.operator!=NOT_OPERATOR && operation.comparators.length!=0){
@@ -329,9 +335,9 @@ module.exports = class Query{
 
     static createSelect(queryObject){
         let queryString = 'SELECT '
-        while(queryObject.structure.select.columns.length>0){
-            queryString += queryObject.structure.select.columns.pop()
-            if(queryObject.structure.select.columns.length != 0)
+        for(let i = 0; i < queryObject.structure.select.columns.length; i++){
+            queryString += queryObject.structure.select.columns[i]
+            if(i != queryObject.structure.select.columns.length-1)
                 queryString += ', '
             else
                 queryString += ' '
@@ -346,20 +352,20 @@ module.exports = class Query{
             queryString += queryObject.structure.table + ' '
         }
         if(queryObject.structure.hasOwnProperty('join')){
-            while(queryObject.structure.join.length>0){
-                const join = queryObject.structure.join.pop();
+            for(let i = 0; i < queryObject.structure.join.length; i++){
+                const join = queryObject.structure.join[i];
                 queryString += 'JOIN '+ Query.createJoin(join)
             }
         }
         if(queryObject.structure.hasOwnProperty('leftJoin')){
-            while(queryObject.structure.leftJoin.length>0){
-                const join = queryObject.structure.leftJoin.pop();
+            for(let i = 0; i < queryObject.structure.leftJoin.length; i++){
+                const join = queryObject.structure.leftJoin[i];
                 queryString += 'LEFT JOIN '+ Query.createJoin(join)
             }
         }
         if(queryObject.structure.hasOwnProperty('rightJoin')){
-            while(queryObject.structure.rightJoin.length>0){
-                const join = queryObject.structure.rightJoin.pop();
+            for(let i = 0; i < queryObject.structure.rightJoin.length; i++){
+                const join = queryObject.structure.leftJoin[i];
                 queryString += 'RIGHT JOIN '+ Query.createJoin(join)
             }
         }
@@ -368,10 +374,10 @@ module.exports = class Query{
 
         if(queryObject.structure.hasOwnProperty('groupBy')){
             queryString += 'GROUP BY ';
-            while(queryObject.structure.groupBy.length>0){
-                const groupByColumn = queryObject.structure.groupBy.pop();
+            for(let i = 0; i < queryObject.structure.groupBy.length; i++){
+                const groupByColumn = queryObject.structure.groupBy[i];
                 queryString += groupByColumn;
-                if(queryObject.structure.groupBy.length!=0){
+                if(i!=queryObject.structure.groupBy.length-1){
                     queryString += ', '
                 }
                 else{
@@ -473,7 +479,7 @@ module.exports = class Query{
                 if(typeof(queryObject.structure.insertValues[i][j])==typeof("")){
                     values += "'"+queryObject.structure.insertValues[i][j]+"'";
                 } else {
-                    values += queryObject.structure.insertValues[i][j];
+                    values += Query.checkForBooleans(queryObject.structure.insertValues[i][j]);
                 }
                 if(j!=queryObject.structure.insertValues[i].length-1){
                     values+= ', '
@@ -492,6 +498,13 @@ module.exports = class Query{
         let queryString = 'DELETE FROM ' + queryObject.structure.table + ' ';
         queryString += Query.createWhere(queryObject);
         return queryString;
+    }
+
+    static checkForBooleans(value){
+        if(typeof(value)==typeof(true)){
+            return value?1:0;
+        }
+        else return value;
     }
 
 }

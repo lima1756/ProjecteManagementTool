@@ -4,33 +4,29 @@ const oracledb = require('oracledb');
 const jwt = require('jsonwebtoken');
 const jwtControl = require('../../libraries/jwtControl')
 const ErrorManager = require('../../libraries/ErrorManager');
+const DBController =  require('../../libraries/controllers/DBController')
 
 const Query = require('../../libraries/Query');
 
 
 const secret = require('../../config/secret');
 
-router.get('/', (req, res)=>{
-    res.send("Here is supossed to return users")
-});
+const emailRegex = /^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/g
 
 router.post('/login', (req, res)=>{
-    const emailRegex = /^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/g
     const user = req.body.user;
     const password = req.body.password;
     let userId = null;
 
-    let searchUser;
+    let searchUser = new Query('person').select('id', 'password')
 
     if(emailRegex.test(user)){
-        searchUser = new Query('person').select('id', 'password')
-        .join('emails', new Query.Comparator().equalTo('id', 'person_id'))
+        searchUser = searchUser.join('email', new Query.Comparator().equalTo('id', 'person_id'))
         .where(new Query.Comparator().equalTo('email', `'${user}'`))
         .run()
     }
     else {
-        searchUser = new Query('person').select('id', 'password')
-        .where(new Query.Comparator().equalTo('username', `'${user}'`))
+        searchUser = searchUser.where(new Query.Comparator().equalTo('username', `'${user}'`))
         .run()
     }
     searchUser.then(result=>{
@@ -61,20 +57,20 @@ router.post('/login', (req, res)=>{
             throw new ErrorManager.BadRequestError("The data received is incorrect, please verify your user/email and password")
         }
     })
-    .catch(err => {
-        if(!err instanceof ErrorManager.MainError){
+    .catch(err=>{
+        if(!(err instanceof ErrorManager.MainError)){
+            err.msg = err.message;
             return next(new ErrorManager.DataBaseError("There was a problem, please try again in a moment.", err))
         }
         else{
             return next(err);
         }
     });
-    
 });
 
 router.get('/emailExists', (req, res, next)=>{
     const email = req.body.email;
-    new Query('emails')
+    new Query('email')
         .select('email')
         .where(new Query.Comparator().equalTo('email', `'${email}'`))
     .run()
@@ -91,15 +87,16 @@ router.get('/emailExists', (req, res, next)=>{
         }
     })
     .catch(err=>{
-        return new ErrorManager.DataBaseError("There was a problem, please try again in a moment.");
+        err.msg = err.message;
+        return new ErrorManager.DataBaseError("There was a problem, please try again in a moment.", err);
     });
 })
 
 router.get('/userExists', (req, res)=>{
     const user = req.body.user;
     new Query('person')
-        .select('user')
-        .where(new Query.Comparator().equalTo('user', `'${user}'`))
+        .select('username')
+        .where(new Query.Comparator().equalTo('username', `'${user}'`))
     .run()
     .then(result=>{
         if(result.rows.length>0){
@@ -114,7 +111,8 @@ router.get('/userExists', (req, res)=>{
         }
     })
     .catch(err=>{
-        return new ErrorManager.DataBaseError("There was a problem, please try again in a moment.");
+        err.msg = err.message;
+        return new ErrorManager.DataBaseError("There was a problem, please try again in a moment.", err);
     });
 })
 
@@ -132,7 +130,7 @@ router.post('/signup', (req, res, next)=>{
         .run()
     .then(result=>{
         if(result.rows.length==0){
-            return new Query('emails').select('email')
+            return new Query('email').select('email')
                 .where(new Query.Comparator().equalTo('email', `'${email}'`))
                 .run()
         }
@@ -156,11 +154,11 @@ router.post('/signup', (req, res, next)=>{
         return new Query('person')
                 .insert(true, 'username', 'password', 'first_name', 'last_name', 'profile_img', 'verified')
                 .insertValues(user, hash, fName, lName, img, verified)
-                .run(true, {id : {type: oracledb.NUMBER, dir: oracledb.BIND_OUT } })
+                .run(false, {id : {type: oracledb.NUMBER, dir: oracledb.BIND_OUT } })
     })
     .then(result=>{
-        return new Query('emails').insert(false).insertValues(email, result.outBinds.id[0])
-        .run(true)            
+        return new Query('email').insert(false).insertValues(email, 1, result.outBinds.id[0])
+        .run()            
     })
     .then(result=>{
         res.json({
@@ -170,6 +168,7 @@ router.post('/signup', (req, res, next)=>{
     })
     .catch(err=>{
         if(!err instanceof ErrorManager.MainError){
+            err.msg = err.message;
             return next(new ErrorManager.DataBaseError("There was a problem, please try again in a moment.", err))
         }
         else{
@@ -179,6 +178,41 @@ router.post('/signup', (req, res, next)=>{
 
 })
 
+router.get('/searchUser', jwtControl, (req, res, next)=>{
+    const user = req.body.user;
+    
+    let searchUser = 
+        new Query('person').select('username', 'first_name', 'profile_img', 'email', 'id')
+        .join('email', new Query.Comparator().equalTo('id', 'person_id'))
 
+    if(emailRegex.test(user)){
+        searchUser = searchUser.where(Query.Comparator.and(
+            new Query.Comparator().equalTo('email', `'${user}'`),
+            new Query.Comparator().equalTo('main', `1`))
+        )
+        .run(true)
+    }
+    else {
+        searchUser = searchUser.where(Query.Comparator.and(
+            new Query.Comparator().like('username', `'%${user}%'`),
+            new Query.Comparator().equalTo('main', `1`))
+        )
+        .run()
+    }
+
+    searchUser
+    .then(result=>{
+        res.json(DBController.oracleToSimpleJson(result));
+    })
+    .catch(err=>{
+        if(!(err instanceof ErrorManager.MainError)){
+            err.msg = err.message;
+            return next(new ErrorManager.DataBaseError("There was a problem, please try again in a moment.", err))
+        }
+        else{
+            return next(err);
+        }
+    });
+})
 
 module.exports = router;
