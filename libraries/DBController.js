@@ -1,7 +1,7 @@
 process.env.ORA_SDTZ = 'UTC';
 
 const oracledb = require('oracledb');
-const dbConfig = require('../../config/dbconfig.js');
+const dbConfig = require('../config/dbconfig');
 
 
 /**
@@ -19,7 +19,7 @@ module.exports = class DBController{
             if(callback!=null)
               callback(this);
           }).catch(error=>{
-            throw new Error(error);
+            throw error;
           });
       }
     }

@@ -39,12 +39,32 @@ module.exports = class ErrorManager{
         }
     }
 
+    static get UnprocessableEntity(){
+        return class UnprocessableEntity extends ErrorManager.MainError{
+            constructor(message, err = {}){
+                super(message, 422, err);
+            }
+        }
+    }
+
     static get MainError(){
         return class MainError extends Error{
             constructor(message, status, err = {}){
                 super(message)
                 this.status = status;
                 this.error = err;
+            }
+        }
+    }
+
+    static databaseErrorHandler(next){
+        return err=>{
+            if(!(err.prototype instanceof ErrorManager.MainError) && err.status == null){
+                err.msg = err.message;
+                return next(new ErrorManager.DataBaseError("There was a problem, please try again in a moment.", err))
+            }
+            else{
+                return next(err);
             }
         }
     }

@@ -4,7 +4,7 @@ const oracledb = require('oracledb');
 const jwt = require('jsonwebtoken');
 const jwtControl = require('../../libraries/jwtControl')
 const ErrorManager = require('../../libraries/ErrorManager');
-const DBController =  require('../../libraries/controllers/DBController')
+const DBController =  require('../../libraries/DBController')
 
 const Query = require('../../libraries/Query');
 

@@ -1,6 +1,6 @@
 const express = require('express');
 
-const DBController =  require('./libraries/controllers/DBController');
+const DBController =  require('./libraries/DBController');
 const ErrorManager = require('./libraries/ErrorManager')
 
 new DBController(startServer);

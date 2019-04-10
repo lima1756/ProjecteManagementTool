@@ -2,7 +2,7 @@ const router = require('express').Router();
 const jwtControl = require('../../libraries/jwtControl')
 const Query = require('../../libraries/Query');
 const ErrorManager = require('../../libraries/ErrorManager');
-const DBController =  require('../../libraries/controllers/DBController')
+const DBController =  require('../../libraries/DBController')
 const oracledb = require('oracledb');
 
 router.get('/', jwtControl, (req, res, next)=>{

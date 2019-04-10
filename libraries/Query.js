@@ -1,4 +1,4 @@
-const DBController = require('./controllers/DBController');
+const DBController = require('./DBController');
 
 const GREATER_THAN = '>',
     GREATER_THAN_OR_EQUAL_TO = '>=',
@@ -441,21 +441,33 @@ module.exports = class Query{
 
     static createUpdate(queryObject){
         let queryString = 'UPDATE ' + queryObject.structure.table + ' SET ';
-        for(let i = 0; i < queryObject.structure.updateSet.length; i++){
+        if(queryObject.structure.updateSet.length==2 && typeof(queryObject.structure.updateSet[0])===typeof([])){
+            for(let i = 0; i < queryObject.structure.updateSet.length; i++){
+                let val;
+                if(typeof(queryObject.structure.updateSet[i][1])==typeof("")){
+                    val = "'"+queryObject.structure.updateSet[i][1]+"'";
+                } else {
+                    val = Query.checkForBooleans(queryObject.structure.updateSet[i][1]);
+                }
+
+                queryString += queryObject.structure.updateSet[i][0]+' = '+val;
+                if(i!=queryObject.structure.updateSet.length-1){
+                    queryString+= ', '
+                }
+                else{
+                    queryString+= ' '
+                }
+            }
+        }
+        else if(queryObject.structure.updateSet.length==2 && typeof(queryObject.structure.updateSet[0])!=typeof([])){
             let val;
-            if(typeof(queryObject.structure.updateSet[i][1])==typeof("")){
-                val = "'"+queryObject.structure.updateSet[i][1]+"'";
+            if(typeof(queryObject.structure.updateSet[1])==typeof("")){
+                val = "'"+queryObject.structure.updateSet[1]+"'";
             } else {
-                val = Query.checkForBooleans(queryObject.structure.updateSet[i][1]);
+                val = Query.checkForBooleans(queryObject.structure.updateSet[1]);
             }
 
-            queryString += queryObject.structure.updateSet[i][0]+' = '+val;
-            if(i!=queryObject.structure.updateSet.length-1){
-                queryString+= ', '
-            }
-            else{
-                queryString+= ' '
-            }
+            queryString += queryObject.structure.updateSet[0]+' = '+val + ' ';
         }
         queryString += Query.createWhere(queryObject);
         return queryString;
