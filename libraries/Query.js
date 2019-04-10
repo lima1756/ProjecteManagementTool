@@ -124,8 +124,12 @@ module.exports = class Query{
                         let comparator = operation.comparators[i];
                         
                         conditionalString += Comparator.createConditional(comparator);
-                        if(operation.operator!=NOT_OPERATOR && operation.comparators.length!=0){
+                        if(operation.operator!=NOT_OPERATOR && i!=operation.comparators.length-1){
                             conditionalString += operation.operator + ' ';
+                        }
+                        else if(i==operation.comparators.length-1)
+                        {
+                            conditionalString += ' ';
                         }
                     }
                     conditionalString += ') '
@@ -224,7 +228,7 @@ module.exports = class Query{
 
     /**
      * 
-     * @param  {...any} args The arguments of the function should be or an array of arrays 
+     * @param  {...any} args The arguments of the function should be an array of arrays 
      * or different arguments of arrays. This second arrays should be [column, <new_value>]
      */
     update(...args){
@@ -438,7 +442,14 @@ module.exports = class Query{
     static createUpdate(queryObject){
         let queryString = 'UPDATE ' + queryObject.structure.table + ' SET ';
         for(let i = 0; i < queryObject.structure.updateSet.length; i++){
-            queryString += queryObject.structure.updateSet[i][0]+' = '+queryObject.structure.updateSet[i][1]
+            let val;
+            if(typeof(queryObject.structure.updateSet[i][1])==typeof("")){
+                val = "'"+queryObject.structure.updateSet[i][1]+"'";
+            } else {
+                val = Query.checkForBooleans(queryObject.structure.updateSet[i][1]);
+            }
+
+            queryString += queryObject.structure.updateSet[i][0]+' = '+val;
             if(i!=queryObject.structure.updateSet.length-1){
                 queryString+= ', '
             }
