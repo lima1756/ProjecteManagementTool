@@ -441,15 +441,18 @@ module.exports = class Query{
 
     static createUpdate(queryObject){
         let queryString = 'UPDATE ' + queryObject.structure.table + ' SET ';
-        if(queryObject.structure.updateSet.length==2 && typeof(queryObject.structure.updateSet[0])===typeof([])){
+        
+        if(queryObject.structure.updateSet.length>=2 && typeof(queryObject.structure.updateSet[0])===typeof([])){
             for(let i = 0; i < queryObject.structure.updateSet.length; i++){
                 let val;
                 if(typeof(queryObject.structure.updateSet[i][1])==typeof("")){
                     val = "'"+queryObject.structure.updateSet[i][1]+"'";
-                } else {
+                } else if(queryObject.structure.updateSet[i][1].isDate){
+                    val = `TO_DATE( '${queryObject.structure.updateSet[i][1].date}', '${queryObject.structure.updateSet[i][1].format}')`;
+                }  else {
                     val = Query.checkForBooleans(queryObject.structure.updateSet[i][1]);
                 }
-
+                
                 queryString += queryObject.structure.updateSet[i][0]+' = '+val;
                 if(i!=queryObject.structure.updateSet.length-1){
                     queryString+= ', '
@@ -501,7 +504,10 @@ module.exports = class Query{
             for(let j = 0; j < queryObject.structure.insertValues[i].length; j++){
                 if(typeof(queryObject.structure.insertValues[i][j])==typeof("")){
                     values += "'"+queryObject.structure.insertValues[i][j]+"'";
-                } else {
+                } else if(queryObject.structure.insertValues[i][j].isDate){
+                    values += `TO_DATE( '${queryObject.structure.insertValues[i][j].date}', '${queryObject.structure.insertValues[i][j].format}')`;
+                }   
+                else{
                     values += Query.checkForBooleans(queryObject.structure.insertValues[i][j]);
                 }
                 if(j!=queryObject.structure.insertValues[i].length-1){
@@ -523,6 +529,13 @@ module.exports = class Query{
         return queryString;
     }
 
+    static dateValue(date, format){
+        return {
+            isDate: true,
+            date: date,
+            format: format
+        }
+    }
     static checkForBooleans(value){
         if(typeof(value)==typeof(true)){
             return value?1:0;

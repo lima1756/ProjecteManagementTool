@@ -53,6 +53,7 @@ module.exports = class ErrorManager{
                 super(message)
                 this.status = status;
                 this.error = err;
+                this.stack = err.stack
             }
         }
     }

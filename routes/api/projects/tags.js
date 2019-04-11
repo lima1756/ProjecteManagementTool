@@ -2,7 +2,6 @@ const router = require('express').Router();
 const Query = require('../../../libraries/Query')
 const ErrorManager = require('../../../libraries/ErrorManager')
 const DBController = require('../../../libraries/DBController')
-const oracledb = require('oracledb')
 const jwt = require('../../../libraries/jwtControl');
 const ProjectPermission = require('../../../libraries/ProjectPermissionsController');
 const PermissionsTypes = ProjectPermission.PermissionsType;
@@ -10,9 +9,12 @@ const PermissionsTypes = ProjectPermission.PermissionsType;
 router.get('/', (req, res, next)=>{
     const projectId = req.body.projectId;
     
-    new Query('tag').select('*')
+    ProjectPermission.checkIfContributorToProject(userId, projectId)
+    .then(result=>{
+        return new Query('tag').select('*')
         .where(new Query.Comparator().equalTo('project_id', projectId))
         .run()
+    })
     .then(result=>{
         res.json(DBController.oracleToSimpleJson(result))
     })

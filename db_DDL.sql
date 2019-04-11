@@ -82,7 +82,9 @@ CREATE TABLE milestone(
     milestone_description VARCHAR(4000) NOT NULL,
     deadline DATE,
     milestone_state VARCHAR(6) DEFAULT 'open' CHECK( milestone_state IN ('open','closed') ) NOT NULL,
-    visible NUMBER(1) DEFAULT 0 NOT NULL
+    visible NUMBER(1) DEFAULT 1 NOT NULL,
+    project_id INT,
+    CONSTRAINT milestone_fk_project FOREIGN KEY (project_id) REFERENCES project(id)
 );
 
 CREATE TABLE milestone_tag(
@@ -100,6 +102,8 @@ CREATE TABLE task(
     deadline DATE,
     task_state VARCHAR(15) DEFAULT 'open' CHECK( task_state IN ('open','closed', 'closed_finished') ) NOT NULL,
     milestone_id INT,
+    list_id INT,
+    CONSTRAINT task_fk_list FOREIGN KEY (list_id) REFERENCES list(id) ON DELETE SET NULL,
     CONSTRAINT task_fk_milestone FOREIGN KEY (milestone_id) REFERENCES milestone(id) ON DELETE SET NULL
 );
 

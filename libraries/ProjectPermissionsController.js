@@ -42,4 +42,27 @@ module.exports = class ProjectPermissionsController{
             });
         });
     }
+
+    static checkIfContributorToProject(userId, projectId){
+        return new Promise((resolve, reject)=>{
+            new Query('project_permissions')
+                .select('person_id')
+                .where(Query.Comparator.and(
+                    new Query.Comparator().equalTo('project_id', projectId),
+                    new Query.Comparator().equalTo('person_id', userId)
+                ))
+                .run()
+            .then(result=>{
+                if(result.rows.length == 1){
+                    resolve(true);
+                }
+                else{
+                    reject(new ErrorManager.Forbidden("You're not authorized to do this"))
+                }  
+            })
+            .catch(err => {
+                reject(err)
+            });
+        });
+    }
 }
