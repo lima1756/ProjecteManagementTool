@@ -1,5 +1,5 @@
 {
-  "name": "projectmanagement",
+  "name": "projectmanagement-backend",
   "version": "1.0.0",
   "description": "This is the project for the databases class at ITESM gda. This project is focused on creating a web app for project management",
   "main": "index.js",
