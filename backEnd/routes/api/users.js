@@ -13,7 +13,7 @@ const secret = require('../../config/secret');
 
 const emailRegex = /^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/g
 
-router.post('/login', (req, res)=>{
+router.post('/login', (req, res, next)=>{
     const user = req.body.user;
     const password = req.body.password;
     let userId = null;
@@ -57,15 +57,7 @@ router.post('/login', (req, res)=>{
             throw new ErrorManager.BadRequestError("The data received is incorrect, please verify your user/email and password")
         }
     })
-    .catch(err=>{
-        if(!(err instanceof ErrorManager.MainError)){
-            err.msg = err.message;
-            return next(new ErrorManager.DataBaseError("There was a problem, please try again in a moment.", err))
-        }
-        else{
-            return next(err);
-        }
-    });
+    .catch(ErrorManager.databaseErrorHandler(next));
 });
 
 router.get('/emailExists', (req, res, next)=>{

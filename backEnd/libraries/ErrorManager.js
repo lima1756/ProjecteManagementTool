@@ -8,7 +8,7 @@ module.exports = class ErrorManager{
     }
 
     static get InternalServerError(){
-        return class DataBaseError extends ErrorManager.MainError{
+        return class InternalServerError extends ErrorManager.MainError{
             constructor(message, err = {}){
                 super(message, 500, err);
             }
