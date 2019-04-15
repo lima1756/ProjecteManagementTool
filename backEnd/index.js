@@ -2,6 +2,7 @@ const express = require('express');
 
 const DBController =  require('./libraries/DBController');
 const ErrorManager = require('./libraries/ErrorManager')
+var cors = require('cors');
 
 new DBController(startServer);
 
@@ -11,6 +12,8 @@ function startServer(DBInstance){
   const isProduction = process.env.NODE_ENV === 'production';
 
   const app = express();
+
+  app.use(cors());
 
 
   app.use(express.json());

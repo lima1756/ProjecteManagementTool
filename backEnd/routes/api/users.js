@@ -69,7 +69,7 @@ router.post('/login', (req, res)=>{
 });
 
 router.get('/emailExists', (req, res, next)=>{
-    const email = req.body.email;
+    const email = req.query.email;
     new Query('email')
         .select('email')
         .where(new Query.Comparator().equalTo('email', `'${email}'`))
@@ -93,12 +93,13 @@ router.get('/emailExists', (req, res, next)=>{
 })
 
 router.get('/userExists', (req, res)=>{
-    const user = req.body.user;
+    const user = req.query.user;
     new Query('person')
         .select('username')
         .where(new Query.Comparator().equalTo('username', `'${user}'`))
-    .run()
+    .run(true)
     .then(result=>{
+        console.log(result)
         if(result.rows.length>0){
             res.json({
                 exists:true
