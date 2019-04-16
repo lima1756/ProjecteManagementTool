@@ -1,4 +1,5 @@
 import React from 'react';
+import { Redirect } from 'react-router-dom'
 import PropTypes from 'prop-types';
 import Login from './Login'
 import SignUp from './SignUp'
@@ -44,6 +45,9 @@ class LandingPage extends React.Component {
     }
 
     render() {
+        if(localStorage.getItem('token')){
+            return <Redirect to="/dashboard" />
+        }
         return (
         <div className='fullHeight'>
             <div className='bg'>

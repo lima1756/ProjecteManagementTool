@@ -1,6 +1,7 @@
 import React from 'react';
 import FormInput from './FormInput';
 import PropTypes from 'prop-types';
+import {Redirect} from 'react-router-dom';
 
 class Login extends React.Component {
     
@@ -10,7 +11,8 @@ class Login extends React.Component {
       password:'',
       toast: false,
       toastMessage: '',
-      logInMessage: ''
+      logInMessage: '',
+      loggedIn: false
     }
 
     constructor(props){
@@ -35,11 +37,14 @@ class Login extends React.Component {
             throw new Error('500')
           else if(response.status==400)
             throw new Error('400')
-          response.json()
+          return response.json()
         })
         .then(json=>{
           if(json.success){
             localStorage.setItem('token', json.token);
+            this.setState({
+              loggedIn: true
+            })
           }
           else{
             throw new Error('error')
@@ -57,6 +62,9 @@ class Login extends React.Component {
     }
 
     render() {
+        if(this.state.loggedIn){
+          return <Redirect to="/dashboard" />
+        }
         return (
         <div className="modal active" id="modal-id">
             <a href="#close" className="modal-overlay" aria-label="Close" onClick={this.props.close}></a>

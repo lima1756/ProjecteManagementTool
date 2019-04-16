@@ -42,11 +42,18 @@ class FormInput extends React.Component {
         status: PropTypes.shape({
             value: PropTypes.number,
             message: PropTypes.string
-        }).isRequired,
+        }),
         check: PropTypes.shape({
             chechButton: PropTypes.bool,
             checkFunction: PropTypes.func
         })
+    }
+
+    static defaultProps = {
+        status: {
+            value: 0,
+            message: ''
+        }
     }
 }
 
