@@ -1,5 +1,5 @@
 import React from 'react';
-import FormInput from './FormInput';
+import FormInput from '../FormInput';
 import PropTypes from 'prop-types';
 
 class SignUp extends React.Component {

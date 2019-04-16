@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import ProjectNavbar from '../NavBar/ProjectNavbar';
-import ProjectsPanel from '../ProjectsPanel';
+import ProjectsPanel from '../general/ProjectsPanel';
 import NotFoundPage from './NotFoundPage';
 
 class ProjectDashboard extends React.Component {

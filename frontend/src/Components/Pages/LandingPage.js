@@ -1,8 +1,8 @@
 import React from 'react';
 import { Redirect } from 'react-router-dom'
 import PropTypes from 'prop-types';
-import Login from './Login'
-import SignUp from './SignUp'
+import Login from '../general/Modal/Login'
+import SignUp from '../general/Modal/SignUp'
 
 class LandingPage extends React.Component {
     

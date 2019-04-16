@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import ProjectsPanel from '../ProjectsPanel';
+import ProjectsPanel from '../general/ProjectsPanel';
 
 class Dashboard extends React.Component {
     

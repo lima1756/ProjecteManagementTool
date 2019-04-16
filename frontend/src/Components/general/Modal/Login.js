@@ -1,5 +1,5 @@
 import React from 'react';
-import FormInput from './FormInput';
+import FormInput from '../FormInput';
 import PropTypes from 'prop-types';
 import {Redirect} from 'react-router-dom';
 
@@ -55,8 +55,6 @@ class Login extends React.Component {
             this.setState({logInMessage:"There was an unexpected problem, please try again in a moment"})
           else if(e.message==='400')
             this.setState({logInMessage:"Please check your username/email and password"})
-        })
-        .finally(()=>{
           this.setState({toast:true});
         })
     }
