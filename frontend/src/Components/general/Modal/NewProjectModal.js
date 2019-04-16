@@ -36,6 +36,7 @@ class NewProjectModal extends React.Component {
         })
         .then(json => {
             if (json.success) {
+                self.props.reload();
                 self.props.close();
             }
             else {
@@ -81,7 +82,8 @@ class NewProjectModal extends React.Component {
     }
 
     static propTypes = {
-        close: PropTypes.func.isRequired
+        close: PropTypes.func.isRequired,
+        reload: PropTypes.func
     }
 
 }

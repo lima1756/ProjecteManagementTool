@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom'
 import PropTypes from 'prop-types';
 import NewProjectModal from './Modal/NewProjectModal';
+import Panel from '../general/Panel'
 
 class ProjectPanel extends React.Component {
     
@@ -16,9 +17,17 @@ class ProjectPanel extends React.Component {
         super(props);
         this.updateProjects = this.updateProjects.bind(this);
         this.updateProjects();
+        this._isMounted = true;
+
     }
 
     updateProjects(){
+        if(this._isMounted)
+        {
+            this.setState({
+                loading: true
+            })
+        }
         fetch('http://127.0.0.1:3000/api/projects', {
             method: 'get',
             Accept: 'application/json',
@@ -74,17 +83,11 @@ class ProjectPanel extends React.Component {
         }
         return (
             <div className='column col-3'>
-                <div className="panel">
-                    <div className="panel-header">
-                        <div className="panel-title">Projects</div>
-                    </div>
-                    <div className="panel-body">
-
+                <Panel title='Projects'>
                     {
                         this.state.data.rows.map((row,index)=>{
                             return(
-
-                                <div className='tile' key={row['ID']}>
+                                <div className='tile' key={row['ID']} position={Panel.POSITION_BODY}>
                                     <div className="tile-content">
                                         <Link to={'/dashboard/project/'+row['ID']} className="tile-title text-bold">    
                                                 {row['PROJECT_NAME']}
@@ -94,13 +97,9 @@ class ProjectPanel extends React.Component {
                             )
                         })
                     }
-                        
-                    </div>
-                    <div className="panel-footer">
-                        <button className="btn btn-primary btn-block" onClick={()=>{this.setState({modal:true})}}>New project</button>
-                    </div>
-                </div>
-                {this.state.modal && <NewProjectModal close={()=>{this.setState({modal:false})}}/>}
+                    <button className="btn btn-primary btn-block" onClick={()=>{this.setState({modal:true})}} position={Panel.POSITION_FOOTER}>New project</button>
+                </Panel>
+                {this.state.modal && <NewProjectModal close={()=>{this.setState({modal:false})}} reload={this.updateProjects} />}
             </div>
         )
     }
