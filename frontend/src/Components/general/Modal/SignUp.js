@@ -92,8 +92,8 @@ class SignUp extends React.Component {
 
     async submit(){
         let error = false;
-        const emailRegex = /^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/g;
-        if(this.state.fName.length==0){
+        const emailRegex = /^([a-zA-Z0-9_\-.]+)@([a-zA-Z0-9_\-.]+)\.([a-zA-Z]{2,5})$/g;
+        if(this.state.fName.length===0){
             error = true;
             this.setState({
                 checkFirstName:-1
@@ -105,7 +105,7 @@ class SignUp extends React.Component {
             })
         }
 
-        if(this.state.lName.length==0){
+        if(this.state.lName.length===0){
             error = true;
             this.setState({
                 checkLastName:-1
@@ -117,7 +117,7 @@ class SignUp extends React.Component {
             })
         }
 
-        if(this.state.user.length==0){
+        if(this.state.user.length===0){
             error = true;
             this.setState({
                 checkUser:-1
@@ -180,7 +180,7 @@ class SignUp extends React.Component {
                     signUpStatus:-1
                 })
             }
-            else if(response.status == 400){
+            else if(response.status === 400){
                 this.setState({
                     signUpMessage: 'Please check your information',
                     signUpStatus:-1
@@ -217,10 +217,10 @@ class SignUp extends React.Component {
     render() {
         return (
         <div className="modal active" id="modal-id">
-            <a href="#close" className="modal-overlay" aria-label="Close" onClick={this.props.close}></a>
+            <div href="#close" className="modal-overlay" aria-label="Close" onClick={this.props.close}></div>
             <div className="modal-container">
               <div className="modal-header">
-                <a href="#close" className="btn btn-clear float-right" aria-label="Close" onClick={this.props.close}></a>
+                <button href="#close" className="btn btn-clear float-right" aria-label="Close" onClick={this.props.close}></button>
                 <div className="modal-title h5">SignUp</div>
               </div>
               <div className="modal-body">
