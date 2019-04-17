@@ -3,13 +3,6 @@ import PropTypes from 'prop-types';
 
 class FormInput extends React.Component {
 
-    constructor(props){
-        super(props);
-        this.state = {
-            [props.inputId]:''
-        }
-    }
-
     render() {
         let input = (
             <input className={this.props.status.value===0?"form-input":this.props.status.value===1?"form-input is-success":"form-input is-error"}

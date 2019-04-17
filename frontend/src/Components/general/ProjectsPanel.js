@@ -53,15 +53,6 @@ class ProjectPanel extends React.Component {
     }
 
     render(){
-        if(this.state.loading){
-            return(
-                <div className='column col-3'>
-                    <div className="empty">
-                        <div className="loading loading-lg"></div>
-                    </div>
-                </div>
-            )
-        }
         if(this.state.isEmpty){
             return(
                 <div className='column col-3'>
@@ -83,7 +74,7 @@ class ProjectPanel extends React.Component {
         }
         return (
             <div className='column col-3'>
-                <Panel title='Projects'>
+                <Panel title='Projects' loading={this.state.loading}>
                     {
                         this.state.data.rows.map((row,index)=>{
                             return(

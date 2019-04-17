@@ -12,7 +12,6 @@ class ProjectNavbar extends React.Component{
     render(){
         return(
             <Navbar>
-                <Button to='milestones' text='Milestones' position={Navbar.POSITION_LEFT} className='btn btn-link'/>
                 <Button to='lists' text='Lists' position={Navbar.POSITION_LEFT} className='btn btn-link'/>
                 <Button to='tags' text='Tags' position={Navbar.POSITION_LEFT} className='btn btn-link'/>
                 <Button to='.' text={this.props.name} position={Navbar.POSITION_CENTER} className='navbar-brand text-bold mr-2'/>

@@ -511,3 +511,31 @@ body, html, #app, .fullHeight {
   .remove-file{
     color:red;
   }
+
+  .example-tile-icon{
+    align-content:space-around;
+    align-items:center;
+    border-radius:.1rem;
+    color:#fff;
+    display:flex;
+    display:-ms-flexbox;
+    -ms-flex-align:center;
+    -ms-flex-line-pack:distribute;
+    font-size:1.2rem;
+    height:2rem;
+    width:2rem
+  }
+
+  .icon{
+    margin:auto;
+  }
+
+  .auto-scroll-height-60{
+    height:60vh;
+    overflow-y: auto;
+  }
+
+  .auto-scroll-height-60{
+    height:80vh;
+    overflow-y: auto;
+  }

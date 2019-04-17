@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 
 class Panel extends Component {
 
@@ -25,6 +26,13 @@ class Panel extends Component {
     }
 
     render() {
+        if(this.props.loading){
+            return (
+                <div className="empty">
+                    <div className="loading loading-lg"></div>
+                </div>
+            )
+        }
         return (
             <div className="panel">
                 <div className="panel-header">
@@ -35,7 +43,7 @@ class Panel extends Component {
                         this.mapChildren(Panel.POSITION_NAVIGATION, this.props.children)
                     }
                 </div>
-                <div className="panel-body">
+                <div className="panel-body auto-scroll-height-60">
                     {
                         this.mapChildren(Panel.POSITION_BODY, this.props.children)
                     }
@@ -47,6 +55,11 @@ class Panel extends Component {
                 </div>
             </div>
         );
+    }
+
+    static propTypes = {
+        loading: PropTypes.bool.isRequired,
+        title: PropTypes.string.isRequired
     }
 }
 
