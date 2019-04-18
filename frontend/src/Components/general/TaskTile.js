@@ -1,14 +1,15 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import ChipTag from './ChipTag'
 
 class TaskTile extends Component {
 
     constructor(props){
         super(props);
         this.state = {
-            rows:[]
+            tags:[]
         }
-        fetch('http://127.0.0.1:3000/api/projects/milestones//milestoneTasks?projectId='+this.props.projectId+'&taskId='+this.props.task['ID'], {
+        fetch('http://127.0.0.1:3000/api/projects/milestones/tasks/getTags?projectId='+this.props.projectId+'&taskId='+this.props.task['ID'], {
             method: 'get',
             Accept: 'application/json',
             headers: {
@@ -31,12 +32,14 @@ class TaskTile extends Component {
         const date = new Date(task['DEADLINE']);
         const dateString = date.toLocaleDateString()
         return (
-            <div className="tile tile-centered" key={task['ID']}>
+            <div className="tile tile-centered task-tile" key={task['ID']}>
                 <div className="tile-content">
                     <div className="tile-title">{task['TASK_NAME']}</div>
                     <small className="tile-subtitle text-gray">Deadline: {dateString}</small>
                     <small className="tile-subtitle text-gray">
-                        
+                        {this.state.tags.map((tag, id)=>{
+                            return (<ChipTag key={id} value={tag['tag_name']} color={tag['color']}/>)
+                        })}
                     </small>
                 </div>
                 <div className="tile-action">

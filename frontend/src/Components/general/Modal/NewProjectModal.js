@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import FormInput from '../FormInput'
+import FormInput from '../Forms/FormInput'
 
 class NewProjectModal extends React.Component {
 

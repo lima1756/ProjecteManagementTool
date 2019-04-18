@@ -6,7 +6,8 @@ class FormInput extends React.Component {
     render() {
         let input = (
             <input className={this.props.status.value===0?"form-input":this.props.status.value===1?"form-input is-success":"form-input is-error"}
-                type={this.props.inputType} id={this.props.inputId} placeholder={this.props.inputName} value={this.props.value} onChange={this.props.onChange}></input>
+                type={this.props.inputType} id={this.props.inputId} placeholder={this.props.inputName} value={this.props.value} 
+                onChange={this.props.onChange}></input>
         )
         if(this.props.check){
             input = (

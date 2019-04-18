@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import  MilestoneBody from './MilestoneBody'
 import TaskTile from './TaskTile';
+import NewTaskModal from './Modal/NewTaskModal';
 
 
 class TasksList extends Component {
@@ -11,7 +12,8 @@ class TasksList extends Component {
         super(props);
         this.loadTasks = this.loadTasks.bind(this);
         this.state = {
-            status: MilestoneBody.STATE_EMPTY
+            status: MilestoneBody.STATE_EMPTY,
+            modal: false
         }   
         this.loadTasks();
         this._isMounted = true;
@@ -36,7 +38,7 @@ class TasksList extends Component {
             }
             else{
                 this.setState({
-                    taskStatus:MilestoneBody.STATE_ERROR
+                    status:MilestoneBody.STATE_ERROR
                 })
                 console.log("not 200")
             }
@@ -44,20 +46,20 @@ class TasksList extends Component {
         .then(json=>{
             if(json.size===0){
                 this.setState({
-                    taskStatus:MilestoneBody.STATE_EMPTY,
+                    status:MilestoneBody.STATE_EMPTY,
                     tasks: json.rows
                 })
             }
             else{
                 this.setState({
-                    taskStatus:MilestoneBody.STATE_LOADED,
+                    status:MilestoneBody.STATE_LOADED,
                     tasks: json.rows
                 })
             }
         })
         .catch(err=>{
             this.setState({
-                taskStatus:MilestoneBody.STATE_ERROR
+                status:MilestoneBody.STATE_ERROR
             })
             console.log(err);
         })
@@ -77,8 +79,10 @@ class TasksList extends Component {
                             <p className="empty-title h5">There is no task for current milestone</p>
                             <p className="empty-subtitle">You can create a new one!</p>      
                             <div className="empty-action">
-                                <button className="btn btn-primary" onClick={()=>{/* TODO: create new Task modal */}}>New task</button>
+                                <button className="btn btn-primary" onClick={()=>{this.setState({modal:true})}}>New task</button>
+                                
                             </div>              
+                            {this.state.modal && <NewTaskModal close={()=>{this.setState({modal:false})}} reload={this.loadTasks} projectId={this.props.projectId} milestoneId={this.props.milestoneId}/>}
                         </div>
                 )
             case MilestoneBody.STATE_LOADING:
@@ -91,11 +95,21 @@ class TasksList extends Component {
                 )
             case MilestoneBody.STATE_LOADED:
                 return (
-                    this.state.tasks.map(task=>{
-                        return (
-                            <TaskTile task={task} projectId={this.props.projectId}/>
-                        )
-                    }) 
+                    <div>
+                        {
+                            this.state.tasks.map(task=>{
+                                return (
+                                    <TaskTile key={task['ID']} task={task} projectId={this.props.projectId}/>
+                                )
+                            })
+                        }
+                        <div className='text-center task-tile'>
+                            <button className="btn btn-primary" onClick={()=>{this.setState({modal:true})}}>New task</button>
+                        </div>
+                        
+                        {this.state.modal && <NewTaskModal close={()=>{this.setState({modal:false})}} reload={this.loadTasks} projectId={this.props.projectId} milestoneId={this.props.milestoneId}/>}
+                    </div>
+                    
                 );
         }
     }

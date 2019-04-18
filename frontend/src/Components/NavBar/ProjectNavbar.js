@@ -13,7 +13,7 @@ class ProjectNavbar extends React.Component{
         return(
             <Navbar>
                 <Button to='lists' text='Lists' position={Navbar.POSITION_LEFT} className='btn btn-link'/>
-                <Button to='tags' text='Tags' position={Navbar.POSITION_LEFT} className='btn btn-link'/>
+                <Button text='Tags' position={Navbar.POSITION_LEFT} className='btn btn-link' onClick={this.props.tagsAction}/>
                 <Button to='.' text={this.props.name} position={Navbar.POSITION_CENTER} className='navbar-brand text-bold mr-2'/>
                 <Button to='options' text='Project Option' position={Navbar.POSITION_RIGHT} className='btn btn-link'/>
                 <Button to='/logout' text='LogOut' position={Navbar.POSITION_RIGHT} className='btn btn-link'/>
@@ -22,7 +22,8 @@ class ProjectNavbar extends React.Component{
     }
 
     static propTypes = {
-        name: PropTypes.string.isRequired
+        name: PropTypes.string.isRequired,
+        tagsAction: PropTypes.func.isRequired
     }
 
     

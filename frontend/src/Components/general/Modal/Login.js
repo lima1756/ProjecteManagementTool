@@ -1,5 +1,5 @@
 import React from 'react';
-import FormInput from '../FormInput';
+import FormInput from '../Forms/FormInput';
 import PropTypes from 'prop-types';
 import {Redirect} from 'react-router-dom';
 

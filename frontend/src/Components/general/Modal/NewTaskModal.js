@@ -1,15 +1,14 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import FormInput from '../Forms/FormInput';
-import FormTextArea from '../Forms/FormTextArea'
+import FormTextArea from "../Forms/FormTextArea";
+import FormInput from "../Forms/FormInput";
 
-class NewMilestoneModal extends Component {
-
+class NewTaskModal extends Component {
     state = {
         toast: false,
         toastMessage: '',
-        milestoneName: '',
-        milestoneDescription: '',
+        taskName: '',
+        taskDescription: '',
         deadline: ''
     }
 
@@ -20,7 +19,7 @@ class NewMilestoneModal extends Component {
     }
 
     submit() {
-        fetch('http://127.0.0.1:3000/api/projects/milestones/create', {
+        fetch('http://127.0.0.1:3000/api/projects/milestones/tasks/create', {
             method: 'post',
             Accept: 'application/json',
             headers: {
@@ -29,8 +28,9 @@ class NewMilestoneModal extends Component {
             },
             body: JSON.stringify({
                 projectId: this.props.projectId,
-                milestoneName: this.state.milestoneName,
-                milestoneDescription: this.state.milestoneDescription,
+                milestoneId: this.props.milestoneId,
+                taskName: this.state.taskName,
+                taskDescription: this.state.taskDescription,
                 deadline: this.state.deadline
             })
         })
@@ -68,7 +68,7 @@ class NewMilestoneModal extends Component {
                 <div className="modal-container">
                     <div className="modal-header">
                         <a href="#close" className="btn btn-clear float-right" aria-label="Close" onClick={this.props.close}></a>
-                        <div className="modal-title h5">New Milestone</div>
+                        <div className="modal-title h5">New Task</div>
                     </div>
                     <div className="modal-body" ref={this.modal}>
                         {
@@ -79,10 +79,10 @@ class NewMilestoneModal extends Component {
                             </div>
                         }
                         <div className="content">
-                            <FormInput inputName='Milestone Name' inputId='milestoneName' inputType='text'
-                                value={this.state.milestoneName} onChange={(event) => this.setState({ milestoneName: event.target.value })} />
-                            <FormTextArea inputName='Description' inputId='milestoneDescription' value={this.state.milestoneDescription}
-                                onChange={(event) => this.setState({ milestoneDescription: event.target.value })}/>
+                            <FormInput inputName='Task Name' inputId='taskName' inputType='text'
+                                value={this.state.taskName} onChange={(event) => this.setState({ taskName: event.target.value })} />
+                            <FormTextArea inputName='Description' inputId='taskDescription' value={this.state.taskDescription}
+                                onChange={(event) => this.setState({ taskDescription: event.target.value })}/>
                             <FormInput inputName='Deadline' inputId='milestoneDeadline' inputType='date'
                                 value={this.state.deadline} onChange={(event) => this.setState({ deadline: event.target.value })} />
                             <button className="btn btn-primary input-group-btn" onClick={this.submit}>Submit</button>
@@ -96,9 +96,10 @@ class NewMilestoneModal extends Component {
     static propTypes = {
         close: PropTypes.func.isRequired,
         projectId: PropTypes.number.isRequired,
+        milestoneId: PropTypes.number.isRequired,
         reload: PropTypes.func
         
     }
 }
 
-export default NewMilestoneModal;
+export default NewTaskModal;

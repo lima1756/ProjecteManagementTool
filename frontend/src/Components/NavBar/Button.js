@@ -9,16 +9,21 @@ class Button extends React.Component{
     }
 
     render(){
-        return (
-            <Link to={this.props.to} className={this.props.className}> {this.props.text} </Link>
+        if(this.props.to)
+            return (
+                <Link to={this.props.to} className={this.props.className}> {this.props.text} </Link>            
+            )
+        return(
+            <button className={this.props.className} onClick={this.props.onClick}> {this.props.text} </button>
         )
     }
 
     static propTypes = {
         position: PropTypes.number.isRequired,
-        to: PropTypes.string.isRequired,
+        to: PropTypes.string,
         text: PropTypes.string.isRequired,
-        className: PropTypes.string.isRequired
+        className: PropTypes.string.isRequired,
+        onClick: PropTypes.func
     }
 }
 

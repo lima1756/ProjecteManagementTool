@@ -1,16 +1,19 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
-class Chip extends Component {
+class ChipTag extends Component {
 
     render() {
-        const color = hexToRgb(this.props.color);
+        const color = ChipTag.hexToRgb(this.props.color);
         const chipStyle = {
             color: (color.r*0.299 + color.g*0.587 + color.b*0.114) > 186?'#000000':'#FFFFFF',
             background: this.props.color
         }
         return (
-            <span class="chip" style={chipStyle}>{this.props.value}</span>
+            <div class="chip" style={chipStyle}>
+                {this.props.value}
+                {this.props.delete && <button class="btn btn-clear" aria-label="Close" role="button" onClick={this.props.delete}/>}
+            </div>
         );
     }
 
@@ -30,9 +33,10 @@ class Chip extends Component {
 
 }
 
-Chip.propTypes = {
+ChipTag.propTypes = {
     value: PropTypes.string.isRequired,
-    color: PropTypes.string.isRequired
+    color: PropTypes.string.isRequired,
+    delete: PropTypes.func
 };
 
-export default Chip;
+export default ChipTag;
