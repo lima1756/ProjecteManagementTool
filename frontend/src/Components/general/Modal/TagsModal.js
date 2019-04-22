@@ -32,36 +32,17 @@ class TagsModal extends Component {
     }
 
     obtainTags() {
-        fetch('http://127.0.0.1:3000/api/projects/tags?projectId='+this.props.projectId, {
-            method: 'get',
-            Accept: 'application/json',
-            headers: {
-                "token": localStorage.getItem('token')
-            }
-        })
-        .then(response => {
-            if (response.status === 200)
-                return response.json()
-            else
-                throw new Error(response.status);
-        })
-        .then(json => {
-            if (json) {
-                console.log(json);
-                this.setState({
-                    tags:json.rows
-                })
-            }
-            else {
-                throw new Error('error')
-            }
-        })
-        .catch(e => {
+        this.props.obtainTags((json=>{
+            this.setState({
+                tags:json.rows
+            })
+        }),
+        error=>{
             this.setState({ toastMessage: "There was an unexpected problem, please try again in a moment" })
             this.setState({ toast: true });
             this.modal.current.scrollTop=0;
-        })
-        .finally(()=>{
+        },
+        ()=>{
             this.setState({
                 loading:false
             })
@@ -195,7 +176,8 @@ class TagsModal extends Component {
 
 TagsModal.propTypes = {
     projectId: PropTypes.number.isRequired,
-    close: PropTypes.func.isRequired
+    close: PropTypes.func.isRequired,
+    obtainTags: PropTypes.func.isRequired
 };
 
 export default TagsModal;

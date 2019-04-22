@@ -7,7 +7,7 @@ const ProjectPermission = require('../../../../libraries/ProjectPermissionsContr
 const PermissionsTypes = ProjectPermission.PermissionsType;
 
 router.get('/', jwt, (req, res, next)=>{
-  const projectId = req.body.projectId;
+  const projectId = req.query.projectId;
   const userId = req.user;
 
   ProjectPermission.checkIfContributorToProject(userId, projectId)
@@ -25,19 +25,16 @@ router.get('/', jwt, (req, res, next)=>{
 })
 
 router.get('/milestoneTasks', jwt, (req, res, next)=>{
-    const projectId = req.body.projectId;
+    const projectId = req.query.projectId;
     const userId = req.user;
-    const milestoneId = req.body.milestoneId;
+    const milestoneId = req.query.milestoneId;
 
     ProjectPermission.checkIfContributorToProject(userId, projectId)
     .then(result=>{
       return new Query('task')
         .select('*')
-        .where(Query.Comparator.and(
-            new Query.Comparator().equalTo('project_id', projectId),
-            new Query.Comparator().equalTo('milestone_id', milestoneId),
-            ))
-        .run()
+        .where(new Query.Comparator().equalTo('milestone_id', milestoneId))
+        .run(true)
     })
     .then(result=>{
       res.json(DBController.oracleToSimpleJson(result))
@@ -52,8 +49,7 @@ router.post('/create', jwt, (req, res, next)=>{
   const taskName = req.body.taskName, 
     taskDescription = req.body.taskDescription, 
     deadline = req.body.deadline,
-    dateFormat = req.body.dateFormat;
-
+    dateFormat = req.body.dateFormat || 'YYYY-MM-DD';
   ProjectPermission.checkPermission(userId, projectId, PermissionsTypes.TASK_CREATE)
   .then(result=>{
     return new Query('task')
@@ -115,8 +111,8 @@ router.delete('/delete', jwt, (req, res, next)=>{
 
 router.get('/getTags', jwt, (req, res, next)=>{
     const userId = req.user;
-    const projectId = req.body.projectId,
-      taskId = req.body.taskId;
+    const projectId = req.query.projectId,
+      taskId = req.query.taskId;
   
     ProjectPermission.checkIfContributorToProject(userId, projectId)
     .then(result=>{

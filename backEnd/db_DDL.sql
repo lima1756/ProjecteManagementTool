@@ -71,7 +71,7 @@ CREATE TABLE project_permissions(
 CREATE TABLE tag(
     id INT GENERATED ALWAYS as IDENTITY(START with 1 INCREMENT by 1) PRIMARY KEY,
     tag_name VARCHAR(20),
-    color VARCHAR(6),
+    color VARCHAR(7),
     project_id INT,
     CONSTRAINT tag_fk_project FOREIGN KEY (project_id) REFERENCES project(id) ON DELETE CASCADE
 );

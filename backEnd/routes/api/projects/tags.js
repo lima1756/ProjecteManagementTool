@@ -6,9 +6,10 @@ const jwt = require('../../../libraries/jwtControl');
 const ProjectPermission = require('../../../libraries/ProjectPermissionsController');
 const PermissionsTypes = ProjectPermission.PermissionsType;
 
-router.get('/', (req, res, next)=>{
-    const projectId = req.body.projectId;
-    
+router.get('/', jwt, (req, res, next)=>{
+    const projectId = req.query.projectId;
+    const userId = req.user;
+
     ProjectPermission.checkIfContributorToProject(userId, projectId)
     .then(result=>{
         return new Query('tag').select('*')

@@ -12,7 +12,7 @@ class ChipTag extends Component {
         return (
             <div class="chip" style={chipStyle}>
                 {this.props.value}
-                {this.props.delete && <button class="btn btn-clear" aria-label="Close" role="button" onClick={this.props.delete}/>}
+                {this.props.delete && <button class="btn btn-clear" aria-label="Close" onClick={this.props.delete}/>}
             </div>
         );
     }

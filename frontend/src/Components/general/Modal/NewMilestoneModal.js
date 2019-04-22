@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import FormInput from '../Forms/FormInput';
 import FormTextArea from '../Forms/FormTextArea'
+import Select from 'react-select'
+import chroma from 'chroma-js';
 
 class NewMilestoneModal extends Component {
 
@@ -16,7 +18,12 @@ class NewMilestoneModal extends Component {
     constructor(props){
         super(props);
         this.modal = React.createRef();
+        this.handleChange = this.handleChange.bind(this);
         this.submit = this.submit.bind(this);
+
+        this.state.tags = this.props.tags.map(row=>{
+            return { value: row.ID, label: row.TAG_NAME, color: row.COLOR }
+        })
     }
 
     submit() {
@@ -31,7 +38,8 @@ class NewMilestoneModal extends Component {
                 projectId: this.props.projectId,
                 milestoneName: this.state.milestoneName,
                 milestoneDescription: this.state.milestoneDescription,
-                deadline: this.state.deadline
+                deadline: this.state.deadline,
+                tags: this.state.selectedOption.map(tag=>{return tag.value;})
             })
         })
         .then(response => {
@@ -61,6 +69,11 @@ class NewMilestoneModal extends Component {
         
     }
 
+    handleChange(selectedOption){
+        this.setState({ selectedOption });
+        console.log(`Option selected:`, selectedOption);
+    }
+
     render() {
         return (
             <div className="modal active" id="modal-id">
@@ -83,8 +96,10 @@ class NewMilestoneModal extends Component {
                                 value={this.state.milestoneName} onChange={(event) => this.setState({ milestoneName: event.target.value })} />
                             <FormTextArea inputName='Description' inputId='milestoneDescription' value={this.state.milestoneDescription}
                                 onChange={(event) => this.setState({ milestoneDescription: event.target.value })}/>
+                            <Select onChange={this.handleChange} options={this.state.tags} isMulti closeMenuOnSelect={false} styles={colourStyles}/>
                             <FormInput inputName='Deadline' inputId='milestoneDeadline' inputType='date'
                                 value={this.state.deadline} onChange={(event) => this.setState({ deadline: event.target.value })} />
+                            
                             <button className="btn btn-primary input-group-btn" onClick={this.submit}>Submit</button>
                         </div>
                     </div>
@@ -96,9 +111,48 @@ class NewMilestoneModal extends Component {
     static propTypes = {
         close: PropTypes.func.isRequired,
         projectId: PropTypes.number.isRequired,
-        reload: PropTypes.func
+        reload: PropTypes.func,
+        tags: PropTypes.array
         
     }
 }
+
+const colourStyles = {
+    control: styles => ({ ...styles, backgroundColor: 'white' }),
+    option: (styles, { data, isDisabled, isFocused, isSelected }) => {
+      const color = chroma(data.color);
+      return {
+        ...styles,
+        backgroundColor: isDisabled
+          ? null
+          : isSelected ? data.color : isFocused ? color.alpha(0.1).css() : null,
+        color: isDisabled
+          ? '#ccc'
+          : isSelected
+            ? chroma.contrast(color, 'white') > 2 ? 'white' : 'black'
+            : data.color,
+        cursor: isDisabled ? 'not-allowed' : 'default',
+      };
+    },
+    multiValue: (styles, { data }) => {
+      const color = chroma(data.color);
+      return {
+        ...styles,
+        backgroundColor: color.alpha(0.1).css(),
+      };
+    },
+    multiValueLabel: (styles, { data }) => ({
+      ...styles,
+      color: data.color,
+    }),
+    multiValueRemove: (styles, { data }) => ({
+      ...styles,
+      color: data.color,
+      ':hover': {
+        backgroundColor: data.color,
+        color: 'white',
+      },
+    }),
+  };
 
 export default NewMilestoneModal;

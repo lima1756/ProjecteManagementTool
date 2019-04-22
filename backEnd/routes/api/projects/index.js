@@ -11,15 +11,32 @@ router.use('/milestones', require('./milestones'));
 
 router.get('/', jwt, (req, res, next)=>{
   const userId = req.user;
-  new Query('project') 
-    .select('project_name', 'project_state')
-    .join('project_permissions', new Query.Comparator().equalTo('id', 'project_id'))
-    .where(new Query.Comparator().equalTo('person_id', userId))
-    .run()
-  .then(result=>{
-    res.json(DBController.oracleToSimpleJson(result))
-  })
-  .catch(ErrorManager.databaseErrorHandler(next))
+  const projectId = req.query.projectId || req.params.projectId || req.body.projectId;
+  if(!projectId){
+    new Query('project') 
+      .select('id', 'project_name', 'project_state')
+      .join('project_permissions', new Query.Comparator().equalTo('id', 'project_id'))
+      .where(new Query.Comparator().equalTo('person_id', userId))
+      .run()
+    .then(result=>{
+      res.json(DBController.oracleToSimpleJson(result))
+    })
+    .catch(ErrorManager.databaseErrorHandler(next))
+  }
+  else{
+    new Query('project') 
+      .select('project.*')
+      .join('project_permissions', new Query.Comparator().equalTo('id', 'project_id'))
+      .where(Query.Comparator.and(
+        new Query.Comparator().equalTo('person_id', userId),
+        new Query.Comparator().equalTo('id', projectId)
+      ))
+      .run()
+    .then(result=>{
+      res.json(DBController.oracleToSimpleJson(result))
+    })
+    .catch(ErrorManager.databaseErrorHandler(next))
+  }
 })
 
 router.post('/create', jwt, (req, res, next)=>{

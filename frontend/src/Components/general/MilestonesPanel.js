@@ -52,7 +52,7 @@ class MilestonesPanel extends Component {
     }
 
     render(){
-        const modal = (<div>{this.state.modal && <NewMilestoneModal projectId={parseInt(this.props.projectId)} close={()=>{this.setState({modal:false})}} reload={this.updateMilestones} />}</div>);
+        const modal = (<div>{this.state.modal && <NewMilestoneModal tags={this.props.tags} projectId={parseInt(this.props.projectId)} close={()=>{this.setState({modal:false})}} reload={this.updateMilestones} />}</div>);
         if(this.state.isEmpty){
             return(
                 <div className='column col-4'>
@@ -117,7 +117,8 @@ class MilestonesPanel extends Component {
     }
 
     static propTypes = {
-        loadInfo: PropTypes.func
+        loadInfo: PropTypes.func,
+        tags: PropTypes.array
     }
 }
 

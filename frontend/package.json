@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "chroma-js": "^2.0.3",
     "node-sass": "^4.11.0",
     "prop-types": "^15.7.2",
     "react": "^16.8.6",
@@ -10,6 +11,7 @@
     "react-router-dom": "^5.0.0",
     "react-router-relative-link": "^4.0.2",
     "react-scripts": "2.1.8",
+    "react-select": "^2.4.3",
     "spectre.css": "^0.5.8"
   },
   "scripts": {

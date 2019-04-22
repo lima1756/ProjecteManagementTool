@@ -11,9 +11,12 @@ class ProjectDashboard extends React.Component {
 
     constructor(props) {
         super(props);
+        this._rendered = false;
 
         this.loadMilestone = this.loadMilestone.bind(this);
         this.loadBody = this.loadBody.bind(this);
+        this.obtainTags = this.obtainTags.bind(this);
+        this.state.tags=[];
 
         fetch('http://127.0.0.1:3000/api/projects?projectId='+this.state.projectId, {
             method: 'get',
@@ -45,6 +48,52 @@ class ProjectDashboard extends React.Component {
         })
         .catch(err=>{
             console.log(err);
+        })
+        
+        this.obtainTags();
+        this._rendered = true;
+    }
+
+    obtainTags(successCallback, errorCallback, finallyCallback) {
+        fetch('http://127.0.0.1:3000/api/projects/tags?projectId='+this.state.projectId, {
+            method: 'get',
+            Accept: 'application/json',
+            headers: {
+                "token": localStorage.getItem('token')
+            }
+        })
+        .then(response => {
+            if (response.status === 200)
+                return response.json()
+            else
+                throw new Error(response.status);
+        })
+        .then(json => {
+            if (json) {
+                if(successCallback)
+                    successCallback(json);
+                if(this._rendered){
+                    console.log(json);
+                    this.setState({
+                        tags:json.rows
+                    })
+                }
+                else{
+                    this.state.tags=json.rows;
+                }
+                
+            }
+            else {
+                throw new Error('error')
+            }
+        })
+        .catch(e => {
+            if(errorCallback)
+                errorCallback(e);
+        })
+        .finally(()=>{
+            if(finallyCallback)
+                finallyCallback();
         })
     }
 
@@ -134,10 +183,10 @@ class ProjectDashboard extends React.Component {
                 <div className='container grid-xl'>
                     <ProjectNavbar name={this.state.projectName} tagsAction={()=>{this.setState({tagsModal:true})}}/>
                     <div className='columns'>
-                        <MilestonesPanel projectId={this.state.projectId} loadInfo={this.loadBody}/>
+                        <MilestonesPanel tags={this.state.tags} projectId={this.state.projectId} loadInfo={this.loadBody} tags={this.state.tags}/>
                         <MilestoneBody state={this.state.milestoneStatus} projectId={parseInt(this.state.projectId)} milestone={this.state.selectedMilestone} tasks={this.state.tasks} tasksStatus={this.state.taskStatus}/>    
                     </div>
-                    {this.state.tagsModal && <TagsModal projectId={parseInt(this.state.projectId)} close={()=>{this.setState({tagsModal:false})}}/>}
+                    {this.state.tagsModal && <TagsModal obtainTags={this.obtainTags} projectId={parseInt(this.state.projectId)} close={()=>{this.setState({tagsModal:false})}}/>}
                 </div>
 
             )
