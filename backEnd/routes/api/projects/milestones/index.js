@@ -13,16 +13,33 @@ router.get('/', jwt, (req, res, next)=>{
   const projectId = req.query.projectId;
   const userId = req.user;
   const milestoneId = req.query.milestoneId;
+  const orderBy = req.body.orderBy || req.query.orderBy
+  const filter = req.body.filter || req.query.filter
+
   if(!milestoneId){
     ProjectPermission.checkIfContributorToProject(userId, projectId)
     .then(result=>{
-      return new Query('milestone')
-        .select('*')
-        .where(Query.Comparator.and(
-          new Query.Comparator().equalTo('project_id', projectId),
-          new Query.Comparator().equalTo('visible', 1)
-        ))
-        .run()
+        let search = new Query('milestone')
+        .select('upper(MILESTONE_NAME) NAME', 'milestone.*');
+        if(orderBy){
+          search.orderBy(false, orderBy);
+        }
+        let filters = []
+        filters.push(new Query.Comparator().equalTo('project_id', projectId), new Query.Comparator().equalTo('visible', 1));
+        if(filter){
+          if(filter==='expired'){
+            filters.push(new Query.Comparator().lessThan('deadline', 'sysdate'))
+          }
+          else if(filter === 'open'){
+            filters.push(new Query.Comparator().equalTo('MILESTONE_STATE', "'open'"))
+            filters.push(new Query.Comparator().greaterThan('deadline', 'sysdate'))
+          }
+          else if(filter === 'closed'){
+            filters.push(new Query.Comparator().lessThan('MILESTONE_STATE', "'closed'"))
+          }
+        }
+        search.where(Query.Comparator.and(filters));
+        return search.run(true)
     })
     .then(result=>{
       res.json(DBController.oracleToSimpleJson(result))
@@ -143,7 +160,7 @@ router.get('/getTags', jwt, (req, res, next)=>{
     .select('tag.id', 'tag_name', 'color')
     .join('tag', new Query.Comparator().equalTo("tag_id", "id"))
     .where(new Query.Comparator().equalTo("milestone_Id", milestoneId))
-    .run(true);
+    .run();
   })
   .then(result=>{
     res.json(DBController.oracleToSimpleJson(result))
