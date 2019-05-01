@@ -16,7 +16,9 @@ class ProjectDashboard extends React.Component {
         this.loadMilestone = this.loadMilestone.bind(this);
         this.loadBody = this.loadBody.bind(this);
         this.obtainTags = this.obtainTags.bind(this);
+        this.handleTagChange = this.handleTagChange.bind(this);
         this.state.tags=[];
+        this.state.selectedTags = [];
 
         fetch('http://127.0.0.1:3000/api/projects?projectId='+this.state.projectId, {
             method: 'get',
@@ -73,9 +75,8 @@ class ProjectDashboard extends React.Component {
                 if(successCallback)
                     successCallback(json);
                 if(this._rendered){
-                    console.log(json);
                     this.setState({
-                        tags:json.rows
+                        tags:json.rows.map(row=>{ return {value: row.ID, label: row.TAG_NAME, color: row.COLOR } })
                     })
                 }
                 else{
@@ -150,12 +151,125 @@ class ProjectDashboard extends React.Component {
             })
             console.log(err);
         })
+
+        fetch('http://127.0.0.1:3000/api/projects/milestones/getTags?projectId='+this.state.projectId+'&milestoneId='+milestoneId, {
+            method: 'get',
+            Accept: 'application/json',
+            headers: {
+                "token": localStorage.getItem('token')
+            }
+        })
+        .then(response=>{
+            if(response.status==200){
+                return response.json();
+            }
+            else{
+                new Error("couldn't get the tags")
+            }
+        })
+        .then(json=>{
+            if(json.rows){
+                this.setState({
+                    selectedTags:json.rows.map(row=>{ return {value: row.ID, label: row.TAG_NAME, color: row.COLOR } })
+                })
+            }
+            else{
+                console.log("no tags")
+            }
+        })
+        .catch(err=>{
+            console.log(err);
+        })
     }
 
     loadBody(milestoneId){
         return ()=>{
             this.loadMilestone(milestoneId);
         }
+    }
+
+    handleTagChange(selectedTags){
+        for(let i = 0; i< selectedTags.length; i++){
+            const id = this.state.selectedTags.findIndex(tag=>selectedTags[i].value===tag.value);
+            if(id===-1){
+                fetch('http://127.0.0.1:3000/api/projects/milestones/addTag', {
+                    method: 'put',
+                    Accept: 'application/json',
+                    headers: {
+                        "Content-Type": "application/json",
+                        "token": localStorage.getItem('token')
+                    },
+                    body: JSON.stringify({
+                        projectId: this.state.projectId,
+                        milestoneId: this.state.selectedMilestone.ID,
+                        tagId: selectedTags[i].value
+                    })
+                })
+                .then(response=>{
+                    if(response.status==200){
+                        return response.json();
+                    }
+                    else{
+                        new Error("couldn't upload the tag")
+                    }
+                })
+                .then(json=>{
+                    if(json.success){
+                        this.setState({
+                            selectedTags:selectedTags
+                        })
+                    }
+                    else{
+                        console.log("no tags")
+                    }
+                })
+                .catch(err=>{
+                    console.log(err);
+                })
+            }
+        }
+
+        for(let i = 0; i< this.state.selectedTags.length; i++){
+            const id = selectedTags.findIndex(tag=>this.state.selectedTags[i].value===tag.value);
+            if(id===-1){
+                fetch('http://127.0.0.1:3000/api/projects/milestones/removeTag', {
+                    method: 'delete',
+                    Accept: 'application/json',
+                    headers: {
+                        "Content-Type": "application/json",
+                        "token": localStorage.getItem('token')
+                    },
+                    body: JSON.stringify({
+                        projectId: this.state.projectId,
+                        milestoneId: this.state.selectedMilestone.ID,
+                        tagId: this.state.selectedTags[i].value
+                    })
+                })
+                .then(response=>{
+                    if(response.status==200){
+                        return response.json();
+                    }
+                    else{
+                        new Error("couldn't upload the tag")
+                    }
+                })
+                .then(json=>{
+                    if(json.success){
+                        this.setState({
+                            selectedTags:selectedTags
+                        })
+                    }
+                    else{
+                        console.log("no tags")
+                    }
+                })
+                .catch(err=>{
+                    console.log(err);
+                })
+            }
+        }
+        
+
     }
 
 
@@ -184,7 +298,7 @@ class ProjectDashboard extends React.Component {
                     <ProjectNavbar name={this.state.projectName} tagsAction={()=>{this.setState({tagsModal:true})}}/>
                     <div className='columns'>
                         <MilestonesPanel tags={this.state.tags} projectId={this.state.projectId} loadInfo={this.loadBody} tags={this.state.tags}/>
-                        <MilestoneBody state={this.state.milestoneStatus} projectId={parseInt(this.state.projectId)} milestone={this.state.selectedMilestone} tasks={this.state.tasks} tasksStatus={this.state.taskStatus}/>    
+                        <MilestoneBody handleTagChange={this.handleTagChange} allTags={this.state.tags} selectedTags={this.state.selectedTags} state={this.state.milestoneStatus} projectId={parseInt(this.state.projectId)} milestone={this.state.selectedMilestone} tasks={this.state.tasks} tasksStatus={this.state.taskStatus}/>    
                     </div>
                     {this.state.tagsModal && <TagsModal obtainTags={this.obtainTags} projectId={parseInt(this.state.projectId)} close={()=>{this.setState({tagsModal:false})}}/>}
                 </div>

@@ -134,29 +134,29 @@ router.delete('/delete', jwt, (req, res, next)=>{
 
 router.get('/getTags', jwt, (req, res, next)=>{
   const userId = req.user;
-  const projectId = req.body.projectId,
-    milestoneId = req.body.milestoneId;
+  const projectId = req.body.projectId || req.query.projectId,
+    milestoneId = req.body.milestoneId  || req.query.milestoneId;
 
   ProjectPermission.checkIfContributorToProject(userId, projectId)
   .then(result=>{
     return new Query('milestone_tag')
-    .select('name', 'color')
+    .select('tag.id', 'tag_name', 'color')
     .join('tag', new Query.Comparator().equalTo("tag_id", "id"))
-    .where(new Query.Comparator().equalTo("milestoneId", milestoneId))
-    .run();
+    .where(new Query.Comparator().equalTo("milestone_Id", milestoneId))
+    .run(true);
   })
   .then(result=>{
-    res.json({success:true})
+    res.json(DBController.oracleToSimpleJson(result))
   })
   .catch(ErrorManager.databaseErrorHandler(next))
 })
 
 router.put('/addTag', jwt, (req, res, next)=>{
   const userId = req.user;
-  const projectId = req.body.projectId,
-    milestoneId = req.body.milestoneId,
-    tagId = req.body.tagId;
-
+  const projectId = req.body.projectId || req.query.projectId,
+    milestoneId = req.body.milestoneId || req.query.milestoneId,
+    tagId = req.body.tagId || req.query.tagId;
+  console.log(req.body)
   ProjectPermission.checkPermission(userId, projectId, PermissionsTypes.MILESTONE_EDIT)
   .then(result=>{
     return new Query('milestone_tag')

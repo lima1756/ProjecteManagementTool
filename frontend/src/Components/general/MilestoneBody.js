@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import Panel from './Panel';
 import TasksList from './TasksList';
+import SelectTag from './Forms/SelectTag';
 
 class MilestoneBody extends Component {
     
@@ -9,6 +10,7 @@ class MilestoneBody extends Component {
     static get STATE_EMPTY(){ return 0; }
     static get STATE_LOADING(){ return 1; }
     static get STATE_LOADED(){ return 2; }
+
 
     render() {
         switch(this.props.state){
@@ -50,12 +52,13 @@ class MilestoneBody extends Component {
                                 {this.props.milestone['MILESTONE_DESCRIPTION']}
                             </div>
                             <div className="card-footer">
+                                <SelectTag selectedTags={this.props.selectedTags} allTags={this.props.allTags} handleChange={this.props.handleTagChange}/>
                                 {/* TODO: Create the edit and remove button */}
-                                <p>Some</p>
+                                
                             </div>
                             <div className="divider text-center" data-content="Tasks"></div>
                             <div>
-                                <TasksList projectId={this.props.projectId} milestoneId={parseInt(this.props.milestone['ID'])}/>
+                                <TasksList projectId={this.props.projectId} milestoneId={parseInt(this.props.milestone['ID'])} allTags={this.props.allTags}/>
                             </div>
                             
                         </div>
@@ -69,7 +72,10 @@ class MilestoneBody extends Component {
 MilestoneBody.propTypes = {
     milestone: PropTypes.object,
     state: PropTypes.number.isRequired,
-    projectId: PropTypes.number.isRequired
+    projectId: PropTypes.number.isRequired,
+    selectedTags: PropTypes.array.isRequired,
+    allTags: PropTypes.array.isRequired,
+    handleTagChange: PropTypes.func.isRequired
 };
 
 export default MilestoneBody;

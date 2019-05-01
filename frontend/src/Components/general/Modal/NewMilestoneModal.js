@@ -2,8 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import FormInput from '../Forms/FormInput';
 import FormTextArea from '../Forms/FormTextArea'
-import Select from 'react-select'
-import chroma from 'chroma-js';
+import SelectTag from '../Forms/SelectTag';
 
 class NewMilestoneModal extends Component {
 
@@ -71,7 +70,6 @@ class NewMilestoneModal extends Component {
 
     handleChange(selectedOption){
         this.setState({ selectedOption });
-        console.log(`Option selected:`, selectedOption);
     }
 
     render() {
@@ -96,7 +94,7 @@ class NewMilestoneModal extends Component {
                                 value={this.state.milestoneName} onChange={(event) => this.setState({ milestoneName: event.target.value })} />
                             <FormTextArea inputName='Description' inputId='milestoneDescription' value={this.state.milestoneDescription}
                                 onChange={(event) => this.setState({ milestoneDescription: event.target.value })}/>
-                            <Select onChange={this.handleChange} options={this.state.tags} isMulti closeMenuOnSelect={false} styles={colourStyles}/>
+                            <SelectTag allTags={this.state.tags} handleChange={this.handleChange}/>
                             <FormInput inputName='Deadline' inputId='milestoneDeadline' inputType='date'
                                 value={this.state.deadline} onChange={(event) => this.setState({ deadline: event.target.value })} />
                             
@@ -117,42 +115,6 @@ class NewMilestoneModal extends Component {
     }
 }
 
-const colourStyles = {
-    control: styles => ({ ...styles, backgroundColor: 'white' }),
-    option: (styles, { data, isDisabled, isFocused, isSelected }) => {
-      const color = chroma(data.color);
-      return {
-        ...styles,
-        backgroundColor: isDisabled
-          ? null
-          : isSelected ? data.color : isFocused ? color.alpha(0.1).css() : null,
-        color: isDisabled
-          ? '#ccc'
-          : isSelected
-            ? chroma.contrast(color, 'white') > 2 ? 'white' : 'black'
-            : data.color,
-        cursor: isDisabled ? 'not-allowed' : 'default',
-      };
-    },
-    multiValue: (styles, { data }) => {
-      const color = chroma(data.color);
-      return {
-        ...styles,
-        backgroundColor: color.alpha(0.1).css(),
-      };
-    },
-    multiValueLabel: (styles, { data }) => ({
-      ...styles,
-      color: data.color,
-    }),
-    multiValueRemove: (styles, { data }) => ({
-      ...styles,
-      color: data.color,
-      ':hover': {
-        backgroundColor: data.color,
-        color: 'white',
-      },
-    }),
-  };
+
 
 export default NewMilestoneModal;

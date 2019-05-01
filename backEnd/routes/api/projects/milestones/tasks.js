@@ -117,7 +117,7 @@ router.get('/getTags', jwt, (req, res, next)=>{
     ProjectPermission.checkIfContributorToProject(userId, projectId)
     .then(result=>{
       return new Query('task_tag')
-      .select('tag_name', 'color')
+      .select('tag_id', 'tag_name', 'color')
       .join('tag', new Query.Comparator().equalTo("tag_id", "id"))
       .where(new Query.Comparator().equalTo("task_id", taskId))
       .run(true);
@@ -133,7 +133,6 @@ router.put('/addTag', jwt, (req, res, next)=>{
   const projectId = req.body.projectId,
     taskId = req.body.taskId,
     tagId = req.body.tagId;
-
   ProjectPermission.checkPermission(userId, projectId, PermissionsTypes.TASK_EDIT)
   .then(result=>{
     return new Query('task_tag')
@@ -158,10 +157,10 @@ router.delete('/removeTag', jwt, (req, res, next)=>{
     return new Query('task_tag')
     .delete()
     .where(Query.Comparator.and(
-      new Query.Comparator().equalTo("task_id", milestoneId),
+      new Query.Comparator().equalTo("task_id", taskId),
       new Query.Comparator().equalTo("tag_id", tagId)
     ))
-    .run();
+    .run(true);
   })
   .then(result=>{
     res.json({success:true})

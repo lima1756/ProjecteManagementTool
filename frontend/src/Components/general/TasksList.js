@@ -99,7 +99,7 @@ class TasksList extends Component {
                         {
                             this.state.tasks.map(task=>{
                                 return (
-                                    <TaskTile key={task['ID']} task={task} projectId={this.props.projectId}/>
+                                    <TaskTile key={task['ID']} task={task} projectId={this.props.projectId} allTags={this.props.allTags}/>
                                 )
                             })
                         }
@@ -117,7 +117,8 @@ class TasksList extends Component {
 
 TasksList.propTypes = {
     milestoneId: PropTypes.number.isRequired,
-    projectId: PropTypes.number.isRequired
+    projectId: PropTypes.number.isRequired,
+    allTags: PropTypes.array.isRequired
 };
 
 export default TasksList;

@@ -148,7 +148,7 @@ class TagsModal extends Component {
                     <div className="modal-body" ref={this.modal}>
                         {
                             this.state.tags.map((tag)=>{
-                                return <ChipTag value={tag['TAG_NAME']} color={tag['COLOR']} delete={this.deleteTag(tag['ID'])}/>
+                                return <ChipTag key={tag['ID']} value={tag['TAG_NAME']} color={tag['COLOR']} delete={this.deleteTag(tag['ID'])}/>
                             })
                         }
                         <div className="modal-title h5">{this.state.tagForm}</div>
