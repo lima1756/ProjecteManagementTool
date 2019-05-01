@@ -123,7 +123,7 @@ router.post('/addColaborator', jwt, (req, res, next)=>{
       return new Query('project_permissions')
         .insert(false)
         .insertValues([memberId, projectId].concat(permissions))
-        .run()
+        .run(true)
     }
     else{
       throw new ErrorManager.Forbidden("You must be the creator of the project");

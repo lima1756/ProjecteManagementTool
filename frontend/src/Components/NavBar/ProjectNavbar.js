@@ -15,7 +15,7 @@ class ProjectNavbar extends React.Component{
                 <Button to='lists' text='Lists' position={Navbar.POSITION_LEFT} className='btn btn-link'/>
                 <Button text='Tags' position={Navbar.POSITION_LEFT} className='btn btn-link' onClick={this.props.tagsAction}/>
                 <Button to='.' text={this.props.name} position={Navbar.POSITION_CENTER} className='navbar-brand text-bold mr-2'/>
-                <Button to='options' text='Project Option' position={Navbar.POSITION_RIGHT} className='btn btn-link'/>
+                <Button text='Project Option' position={Navbar.POSITION_RIGHT} className='btn btn-link' onClick={this.props.optionsAction}/>
                 <Button to='/logout' text='LogOut' position={Navbar.POSITION_RIGHT} className='btn btn-link'/>
             </Navbar>
         )
@@ -23,7 +23,8 @@ class ProjectNavbar extends React.Component{
 
     static propTypes = {
         name: PropTypes.string.isRequired,
-        tagsAction: PropTypes.func.isRequired
+        tagsAction: PropTypes.func.isRequired,
+        optionsAction: PropTypes.func.isRequired,
     }
 
     

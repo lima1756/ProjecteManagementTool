@@ -11,7 +11,7 @@ const Query = require('../../libraries/Query');
 
 const secret = require('../../config/secret');
 
-const emailRegex = /^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/g
+const emailRegex = /^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,6})$/g
 
 router.post('/login', (req, res, next)=>{
     const user = req.body.user;
@@ -21,6 +21,7 @@ router.post('/login', (req, res, next)=>{
     let searchUser = new Query('person').select('id', 'password')
 
     if(emailRegex.test(user)){
+        emailRegex.lastIndex = 0;
         searchUser = searchUser.join('email', new Query.Comparator().equalTo('id', 'person_id'))
         .where(new Query.Comparator().equalTo('email', `'${user}'`))
         .run()
@@ -172,18 +173,18 @@ router.post('/signup', (req, res, next)=>{
 })
 
 router.get('/searchUser', jwtControl, (req, res, next)=>{
-    const user = req.body.user;
+    const user = req.query.user;
     
     let searchUser = 
-        new Query('person').select('username', 'first_name', 'profile_img', 'email', 'id')
+        new Query('person').select('id', 'username', 'first_name', 'profile_img', 'email', 'id')
         .join('email', new Query.Comparator().equalTo('id', 'person_id'))
 
     if(emailRegex.test(user)){
-        searchUser = searchUser.where(Query.Comparator.and(
-            new Query.Comparator().equalTo('email', `'${user}'`),
-            new Query.Comparator().equalTo('main', `1`))
+        emailRegex.lastIndex = 0;
+        searchUser = searchUser.where(
+            new Query.Comparator().equalTo('email', `'${user}'`)
         )
-        .run(true)
+        .run()
     }
     else {
         searchUser = searchUser.where(Query.Comparator.and(

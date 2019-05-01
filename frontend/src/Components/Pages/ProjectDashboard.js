@@ -6,6 +6,7 @@ import NotFoundPage from './NotFoundPage';
 import MilestonesPanel from '../general/MilestonesPanel';
 import MilestoneBody from '../general/MilestoneBody';
 import TagsModal from '../general/Modal/TagsModal';
+import ProjectOptionsModal from '../general/Modal/ProjectOptionsModal';
 
 class ProjectDashboard extends React.Component {
 
@@ -106,7 +107,8 @@ class ProjectDashboard extends React.Component {
         selectedMilestone: null,
         taskStatus: MilestoneBody.STATE_EMPTY,
         tasks: [],
-        tagsModal: false
+        tagsModal: false,
+        optionsModal: false
     }
 
     loadMilestone(milestoneId){
@@ -295,11 +297,12 @@ class ProjectDashboard extends React.Component {
         else {
             return (
                 <div className='container grid-xl'>
-                    <ProjectNavbar name={this.state.projectName} tagsAction={()=>{this.setState({tagsModal:true})}}/>
+                    <ProjectNavbar name={this.state.projectName} tagsAction={()=>{this.setState({tagsModal:true})}} optionsAction={()=>{this.setState({optionsModal:true})}}/>
                     <div className='columns'>
                         <MilestonesPanel tags={this.state.tags} projectId={this.state.projectId} loadInfo={this.loadBody} tags={this.state.tags}/>
                         <MilestoneBody handleTagChange={this.handleTagChange} allTags={this.state.tags} selectedTags={this.state.selectedTags} state={this.state.milestoneStatus} projectId={parseInt(this.state.projectId)} milestone={this.state.selectedMilestone} tasks={this.state.tasks} tasksStatus={this.state.taskStatus}/>    
                     </div>
+                    {this.state.optionsModal && <ProjectOptionsModal close={()=>{this.setState({optionsModal:false})}} projectId={parseInt(this.state.projectId)}/>}
                     {this.state.tagsModal && <TagsModal obtainTags={this.obtainTags} projectId={parseInt(this.state.projectId)} close={()=>{this.setState({tagsModal:false})}}/>}
                 </div>
 
