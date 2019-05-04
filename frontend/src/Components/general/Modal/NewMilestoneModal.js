@@ -20,9 +20,11 @@ class NewMilestoneModal extends Component {
         this.handleChange = this.handleChange.bind(this);
         this.submit = this.submit.bind(this);
 
+        console.log(this.props.tags)
         this.state.tags = this.props.tags.map(row=>{
-            return { value: row.ID, label: row.TAG_NAME, color: row.COLOR }
+            return { value: row.value, label: row.label, color: row.color }
         })
+        console.log(this.state.tags);
     }
 
     submit() {
@@ -46,6 +48,10 @@ class NewMilestoneModal extends Component {
                 throw new Error('500')
             else if (response.status == 400)
                 throw new Error('400')
+            else if (response.status == 403){
+                alert("You're not allowed to do this")
+                throw new Error('403')
+            }
             return response.json()
         })
         .then(json => {

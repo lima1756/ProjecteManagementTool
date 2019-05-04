@@ -31,6 +31,10 @@ class TaskTile extends Component {
         .then(response=>{
             if(response.status===200)
                 return response.json();
+            else if (response.status == 403){
+                alert("You're not allowed to do this")
+                throw new Error('403')
+            }
         })
         .then(json=>{
             console.log(json);
@@ -60,6 +64,10 @@ class TaskTile extends Component {
                 .then(response=>{
                     if(response.status==200){
                         return response.json();
+                    }
+                    else if (response.status == 403){
+                        alert("You're not allowed to do this")
+                        throw new Error('403')
                     }
                     else{
                         new Error("couldn't upload the tag")
@@ -100,6 +108,10 @@ class TaskTile extends Component {
                 .then(response=>{
                     if(response.status==200){
                         return response.json();
+                    }
+                    else if (response.status == 403){
+                        alert("You're not allowed to do this")
+                        throw new Error('403')
                     }
                     else{
                         new Error("couldn't upload the tag")

@@ -36,6 +36,10 @@ class TasksList extends Component {
             if(response.status==200){
                 return response.json();
             }
+            else if (response.status == 403){
+                alert("You're not allowed to do this")
+                throw new Error('403')
+            }
             else{
                 this.setState({
                     status:MilestoneBody.STATE_ERROR

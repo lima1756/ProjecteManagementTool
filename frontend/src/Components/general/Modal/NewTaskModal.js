@@ -47,6 +47,10 @@ class NewTaskModal extends Component {
                 this.props.close();
             }
             else {
+                if (response.status == 403){
+                    alert("You're not allowed to do this")
+                    throw new Error('403')
+                }
                 throw new Error('error')
             }
         })

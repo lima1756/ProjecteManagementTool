@@ -158,7 +158,6 @@ router.delete('/deleteColaborator', jwt, (req, res, next)=>{
       }
   })
   .then(result=>{
-      console.log(result);
       res.json({success:true})
   })
   .catch(err=>{
@@ -170,6 +169,68 @@ router.delete('/deleteColaborator', jwt, (req, res, next)=>{
           return next(err);
       }
   })
+})
+
+router.get('/colaborators', jwt, (req, res, next)=>{
+  const projectId = req.query.projectId;
+  const userId = req.user;
+  checkOwnership(userId, projectId)
+  .then(result=>{
+      if(result.rows.length==1){
+          return new Query('project_permissions')
+              .select('project_permissions.*', 'person.username', 'first_name')
+              .join("person", new Query.Comparator().equalTo('person_id', 'id'))
+              .where(Query.Comparator.and(
+                new Query.Comparator().equalTo('project_id', projectId),
+                new Query.Comparator().differentThan('person_id', userId)
+              ))
+              .run(true)
+      }
+      else{
+          throw new ErrorManager.Forbidden("You must be the creator of the project");
+      }
+  })
+  .then(result=>{
+      res.json(DBController.oracleToSimpleJson(result))
+  })
+  .catch(err=>{
+      if(!(err instanceof ErrorManager.MainError)){
+          err.msg = err.message;
+          return next(new ErrorManager.DataBaseError("There was a problem, please try again in a moment.", err))
+      }
+      else{
+          return next(err);
+      }
+  })
+})
+
+router.put('/modifyColaborator', jwt, (req, res, next)=>{
+  const memberId = req.body.memberId;
+  const projectId = req.body.projectId;
+  const permission = req.body.permission;
+  const permissionValue = req.body.permissionValue
+  const userId = req.user;
+  checkOwnership(userId, projectId)
+  .then(result=>{
+    if(result.rows.length==1){
+      return new Query('project_permissions')
+      .update([permission, permissionValue])
+      .where(Query.Comparator.and(
+        new Query.Comparator().equalTo('PERSON_ID', memberId),
+        new Query.Comparator().equalTo('PROJECT_ID', projectId)
+      ))
+      .run(true)
+    }
+    else{
+      throw new ErrorManager.Forbidden("You must be the creator of the project");
+    }
+  })
+  .then(result=>{
+    res.json({
+      success:true
+    })
+  })
+  .catch(ErrorManager.databaseErrorHandler(next))
 })
 
 function checkOwnership(userId, projectId){

@@ -71,6 +71,10 @@ class TagsModal extends Component {
                     throw new Error('500')
                 else if (response.status == 400)
                     throw new Error('400')
+                else if (response.status == 403){
+                    alert("You're not allowed to do this")
+                    throw new Error('403')
+                }
                 return response.json()
             })
             .then(json => {
@@ -112,6 +116,10 @@ class TagsModal extends Component {
                 throw new Error('500')
             else if (response.status == 400)
                 throw new Error('400')
+            else if (response.status == 403){
+                alert("You're not allowed to do this")
+                throw new Error('403')
+            }
             return response.json()
         })
         .then(json => {

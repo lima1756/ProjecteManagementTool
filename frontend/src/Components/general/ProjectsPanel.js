@@ -38,6 +38,10 @@ class ProjectPanel extends React.Component {
         .then(response=>{
             if(response.status!=200)
                 throw new Error("");
+            else if (response.status == 403){
+                alert("You're not allowed to do this")
+                throw new Error('403')
+            }
             return response.json();
         })
         .then(json=>{

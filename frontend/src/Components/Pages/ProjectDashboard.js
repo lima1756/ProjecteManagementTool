@@ -32,6 +32,10 @@ class ProjectDashboard extends React.Component {
             if(response.status==200){
                 return response.json();
             }
+            else if (response.status == 403){
+                alert("You're not allowed to do this")
+                throw new Error('403')
+            }
             else{
                 console.log("not 200")
             }
@@ -68,6 +72,10 @@ class ProjectDashboard extends React.Component {
         .then(response => {
             if (response.status === 200)
                 return response.json()
+            else if (response.status == 403){
+                alert("You're not allowed to do this")
+                throw new Error('403')
+            }
             else
                 throw new Error(response.status);
         })
@@ -127,6 +135,10 @@ class ProjectDashboard extends React.Component {
             if(response.status==200){
                 return response.json();
             }
+            else if (response.status == 403){
+                alert("You're not allowed to do this")
+                throw new Error('403')
+            }
             else{
                 this.setState({
                     milestoneStatus:MilestoneBody.STATE_ERROR
@@ -164,6 +176,10 @@ class ProjectDashboard extends React.Component {
         .then(response=>{
             if(response.status==200){
                 return response.json();
+            }
+            else if (response.status == 403){
+                alert("You're not allowed to do this")
+                throw new Error('403')
             }
             else{
                 new Error("couldn't get the tags")
@@ -211,6 +227,10 @@ class ProjectDashboard extends React.Component {
                     if(response.status==200){
                         return response.json();
                     }
+                    else if (response.status == 403){
+                        alert("You're not allowed to do this")
+                        throw new Error('403')
+                    }
                     else{
                         new Error("couldn't upload the tag")
                     }
@@ -250,6 +270,10 @@ class ProjectDashboard extends React.Component {
                 .then(response=>{
                     if(response.status==200){
                         return response.json();
+                    }
+                    else if (response.status == 403){
+                        alert("You're not allowed to do this")
+                        throw new Error('403')
                     }
                     else{
                         new Error("couldn't upload the tag")
