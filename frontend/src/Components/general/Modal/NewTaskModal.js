@@ -39,6 +39,10 @@ class NewTaskModal extends Component {
                 throw new Error('500')
             else if (response.status == 400)
                 throw new Error('400')
+            if (response.status == 403){
+                alert("You're not allowed to do this")
+                throw new Error('403')
+            }
             return response.json()
         })
         .then(json => {
@@ -47,10 +51,6 @@ class NewTaskModal extends Component {
                 this.props.close();
             }
             else {
-                if (response.status == 403){
-                    alert("You're not allowed to do this")
-                    throw new Error('403')
-                }
                 throw new Error('error')
             }
         })

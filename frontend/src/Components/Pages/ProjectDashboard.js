@@ -18,6 +18,8 @@ class ProjectDashboard extends React.Component {
         this.loadBody = this.loadBody.bind(this);
         this.obtainTags = this.obtainTags.bind(this);
         this.handleTagChange = this.handleTagChange.bind(this);
+        this.removeMilestone = this.removeMilestone.bind(this);
+        this.changeMilestoneState = this.changeMilestoneState.bind(this);
         this.state.tags=[];
         this.state.selectedTags = [];
 
@@ -116,7 +118,8 @@ class ProjectDashboard extends React.Component {
         taskStatus: MilestoneBody.STATE_EMPTY,
         tasks: [],
         tagsModal: false,
-        optionsModal: false
+        optionsModal: false,
+        reloadPanel: false
     }
 
     loadMilestone(milestoneId){
@@ -199,6 +202,96 @@ class ProjectDashboard extends React.Component {
             console.log(err);
         })
     }
+
+    changeMilestoneState(){
+        let state = this.state.selectedMilestone.MILESTONE_STATE==='open'?'closed':'open';
+        fetch('http://127.0.0.1:3000/api/projects/milestones/updateState', {
+            method: 'put',
+            Accept: 'application/json',
+            headers: {
+                "Content-Type": "application/json",
+                "token": localStorage.getItem('token')
+            },
+            body: JSON.stringify({
+                projectId: this.state.projectId,
+                milestoneId: this.state.selectedMilestone.ID,
+                state: state
+            })
+        })
+        .then(response=>{
+            if(response.status==200){
+                return response.json();
+            }
+            else if (response.status == 403){
+                alert("You're not allowed to do this")
+                throw new Error('403')
+            }
+            else{
+                this.setState({
+                    milestoneStatus:MilestoneBody.STATE_ERROR
+                })
+                console.log("not 200")
+            }
+        })
+        .then(json=>{
+            if(json.success){
+                this.loadMilestone(this.state.selectedMilestone.ID)
+                window.location.reload();
+            }
+        })
+        .catch(err=>{
+            this.setState({
+                milestoneStatus:MilestoneBody.STATE_ERROR
+            })
+            console.log(err);
+        })
+    }
+
+    removeMilestone(){
+        fetch('http://127.0.0.1:3000/api/projects/milestones/delete', {
+            method: 'delete',
+            Accept: 'application/json',
+            headers: {
+                "Content-Type": "application/json",
+                "token": localStorage.getItem('token')
+            },
+            body: JSON.stringify({
+                projectId: this.state.projectId,
+                milestoneId: this.state.selectedMilestone.ID
+            })
+        })
+        .then(response=>{
+            if(response.status==200){
+                return response.json();
+            }
+            else if (response.status == 403){
+                alert("You're not allowed to do this")
+                throw new Error('403')
+            }
+            else{
+                this.setState({
+                    milestoneStatus:MilestoneBody.STATE_ERROR
+                })
+                console.log("not 200")
+            }
+        })
+        .then(json=>{
+            if(json.success){
+                this.setState({
+                    selectedMilestone:null,
+                    milestoneStatus: MilestoneBody.STATE_EMPTY
+                })
+                window.location.reload();
+            }
+        })
+        .catch(err=>{
+            this.setState({
+                milestoneStatus:MilestoneBody.STATE_ERROR
+            })
+            console.log(err);
+        })
+    }
+
 
     loadBody(milestoneId){
         return ()=>{
@@ -324,7 +417,7 @@ class ProjectDashboard extends React.Component {
                     <ProjectNavbar name={this.state.projectName} tagsAction={()=>{this.setState({tagsModal:true})}} optionsAction={()=>{this.setState({optionsModal:true})}}/>
                     <div className='columns'>
                         <MilestonesPanel tags={this.state.tags} projectId={this.state.projectId} loadInfo={this.loadBody} tags={this.state.tags}/>
-                        <MilestoneBody handleTagChange={this.handleTagChange} allTags={this.state.tags} selectedTags={this.state.selectedTags} state={this.state.milestoneStatus} projectId={parseInt(this.state.projectId)} milestone={this.state.selectedMilestone} tasks={this.state.tasks} tasksStatus={this.state.taskStatus}/>    
+                        <MilestoneBody changeState={this.changeMilestoneState} removeMilestone={this.removeMilestone} handleTagChange={this.handleTagChange} allTags={this.state.tags} selectedTags={this.state.selectedTags} state={this.state.milestoneStatus} projectId={parseInt(this.state.projectId)} milestone={this.state.selectedMilestone} tasks={this.state.tasks} tasksStatus={this.state.taskStatus}/>    
                     </div>
                     {this.state.optionsModal && <ProjectOptionsModal close={()=>{this.setState({optionsModal:false})}} projectId={parseInt(this.state.projectId)}/>}
                     {this.state.tagsModal && <TagsModal obtainTags={this.obtainTags} projectId={parseInt(this.state.projectId)} close={()=>{this.setState({tagsModal:false})}}/>}

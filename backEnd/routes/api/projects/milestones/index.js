@@ -29,13 +29,14 @@ router.get('/', jwt, (req, res, next)=>{
         if(filter){
           if(filter==='expired'){
             filters.push(new Query.Comparator().lessThan('deadline', 'sysdate'))
+            filters.push(new Query.Comparator().equalTo('MILESTONE_STATE', "'open'"))
           }
           else if(filter === 'open'){
             filters.push(new Query.Comparator().equalTo('MILESTONE_STATE', "'open'"))
             filters.push(new Query.Comparator().greaterThan('deadline', 'sysdate'))
           }
           else if(filter === 'closed'){
-            filters.push(new Query.Comparator().lessThan('MILESTONE_STATE', "'closed'"))
+            filters.push(new Query.Comparator().equalTo('MILESTONE_STATE', "'closed'"))
           }
         }
         search.where(Query.Comparator.and(filters));
@@ -119,6 +120,27 @@ router.put('/update', jwt, (req, res, next)=>{
   .then(result=>{
     return new Query('milestone')
       .update(['milestone_name', milestoneName], ['milestone_description', milestoneDescription], ['deadline', Query.dateValue(deadline, dateFormat)], ['milestone_state', state])
+      .where(new Query.Comparator().equalTo('id', milestoneId))
+      .run(true);
+  })
+  .then(result=>{
+    console.log(result)
+    res.json({success:true})
+  })
+  .catch(ErrorManager.databaseErrorHandler(next))
+})
+
+router.put('/updateState', jwt, (req, res, next)=>{
+  const userId = req.user;
+  const projectId = req.body.projectId,
+    milestoneId = req.body.milestoneId,
+    state = req.body.state
+  
+  
+  ProjectPermission.checkPermission(userId, projectId, PermissionsTypes.MILESTONE_EDIT)
+  .then(result=>{
+    return new Query('milestone')
+      .update(['milestone_state', state])
       .where(new Query.Comparator().equalTo('id', milestoneId))
       .run(true);
   })

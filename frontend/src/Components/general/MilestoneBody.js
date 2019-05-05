@@ -45,6 +45,24 @@ class MilestoneBody extends Component {
                     <div className='column col-8'>
                         <div className='card auto-scroll-height-80'>
                             <div className="card-header">
+                            <div className="popover popover-left float-right">
+                                <button className="btn float-right"><i className="icon icon-more-vert"></i></button>
+                                <div className="popover-container">
+                                    <ul className="menu">
+                                        <li className="menu-item">
+                                            <a href="#" onClick={this.props.changeState}>
+                                                {this.props.milestone.MILESTONE_STATE==='open'?"Close":"Open"}
+                                            </a>
+                                        </li>
+                                        <li className="menu-item">
+                                            <a href="#" onClick={this.props.removeMilestone}>
+                                                Remove
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                                
                                 <div className="card-title h5">{this.props.milestone['MILESTONE_NAME']}</div>
                                 <div className="card-subtitle text-gray">Deadline: {dateString}</div>
                             </div>
@@ -75,7 +93,9 @@ MilestoneBody.propTypes = {
     projectId: PropTypes.number.isRequired,
     selectedTags: PropTypes.array.isRequired,
     allTags: PropTypes.array.isRequired,
-    handleTagChange: PropTypes.func.isRequired
+    handleTagChange: PropTypes.func.isRequired,
+    changeState: PropTypes.func.isRequired,
+    removeMilestone: PropTypes.func.isRequired
 };
 
 export default MilestoneBody;
